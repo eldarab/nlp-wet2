@@ -5,7 +5,7 @@
       <paths name="student@nlpgpu2019s-0017.eastus.cloudapp.azure.com:22 password">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/student/nlp-wet2" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/student/nlp-wet2" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

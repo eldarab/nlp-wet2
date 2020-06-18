@@ -4,7 +4,7 @@ from auxiliary import split
 class ParseDataReader:
     def __init__(self, file):
         self.file = file
-        # TODO figure what the frick these are about
+        # TODO figure what the $$$$ these are about
         # self.word_dict = word_dict
         # self.pos_dict = pos_dict
         self.sentences = []
