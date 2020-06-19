@@ -1,4 +1,14 @@
 
+def add_or_append(dictionary, item, size=1):
+    """
+    Add size to the key item if it is in the dictionary, otherwise appends the key to the dictionary
+    """
+    if item not in dictionary:
+        dictionary[item] = size
+    else:
+        dictionary[item] += size
+
+
 def split(string, delimiters):
     """
         Split strings according to delimiters
