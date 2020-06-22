@@ -1,23 +1,32 @@
+from chu_liu_edmonds import decode_mst
 from torch import nn
 
 
-class DnnParser(nn.Module):
-    def __init__(self, word_vec_dim, lstm_hidden_size, mlp_hidden_size, mlp_output_size, lstm_hidden_layers=2):
-        super(DnnParser, self).__init__()
-        self.bi_lstm = nn.LSTM(input_size=word_vec_dim, hidden_size=lstm_hidden_size,
-                               num_layers=lstm_hidden_layers, bidirectional=True)
-        self.score_mlp = nn.Linear(in_features=2 * lstm_hidden_size, out_features=mlp_hidden_size), \
-                         nn.Linear(in_features=mlp_hidden_size, out_features=mlp_output_size)
-        self.activation = nn.Tanh()
+class KiperwasserDependencyParser(nn.Module):
+    def __init__(self, *args):
+        super(KiperwasserDependencyParser, self).__init__()
+        self.word_embedding =  # Implement embedding layer for words (can be new or pretrained - word2vec/glove)
+        self.pos_embedding =  # Implement embedding layer for POS tags
+        self.hidden_dim = self.word_embedding.embedding_dim + self.pos_embedding.embedding_dim
+        self.encoder =  # Implement BiLSTM module which is fed with word+pos embeddings and outputs hidden representations
+        self.edge_scorer =  # Implement a sub-module to calculate the scores for all possible edges in sentence dependency graph
+        self.decoder = decode_mst  # This is used to produce the maximum spannning tree during inference
+        self.loss_function =  # Implement the loss function described above
 
-    def forward(self, x):
-        x = self.bi_lstm(x)             # x.size() -> [batch_size, lstm_hidden_size]
-        x = self.score_mlp[0](x)        # x.size() -> [batch_size, mlp_hidden_size]
-        x = self.activation(x)          # x.size() -> [batch_size, mlp_hidden_size]
-        x = self.score_mlp[1](x)        # x.size() ->
-        return x
-
-
-def NLLLoss(D):
-    for x, y in D:
+    def forward(self, sentence):
         pass
+        # word_idx_tensor, pos_idx_tensor, true_tree_heads = sentence
+
+        # Pass word_idx and pos_idx through their embedding layers
+
+        # Concat both embedding outputs
+
+        # Get Bi-LSTM hidden representation for each word+pos in sentence
+
+        # Get score for each possible edge in the parsing graph, construct score matrix
+
+        # Use Chu-Liu-Edmonds to get the predicted parse tree T' given the calculated score matrix
+
+        # Calculate the negative log likelihood loss described above
+
+        # return loss, predicted_tree

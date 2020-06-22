@@ -11,17 +11,49 @@ UNKNOWN_TOKEN = "<unk>"
 PAD_TOKEN = "<pad>"  # Optional: this is used to pad a batch of sentences in different lengths.
 # ROOT_TOKEN = PAD_TOKEN  # this can be used if you are not padding your batches
 ROOT_TOKEN = "<root>"  # use this if you are padding your batches and want a special token for ROOT
-SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]
+SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # TODO if we decide to have a special root token, than add it here
 
 
-class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset
+class ParserDataReader:
+    def __init__(self, file, word_dict, pos_dict):
+        self.file = file
+        self.word_dict = word_dict
+        self.pos_dict = pos_dict
+        self.sentences = []
+        self.__readData__()
+
+    def __readData__(self):
+        """main reader function which also populates the class data structures"""
+        with open(self.file, 'r') as f:
+            cur_sentence = []
+            for line in f:
+                if line == '\n':
+                    self.sentences.append(cur_sentence)
+                    cur_sentence = []
+                    continue
+                line_splitted = line.split('\t')
+                assert len(line_splitted) >= 6
+                token_counter = line_splitted[0]
+                token = line_splitted[1]
+                token_pos = line_splitted[3]
+                token_head = line_splitted[6]
+                cur_sentence.append((token_counter, token, token_pos, token_head))
+        pass
+
+    def get_num_sentences(self):
+        """returns num of sentences in data"""
+        return len(self.sentences)
+
+
+class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset (Ctrl+Q is your friend)
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,  # TODO why this gets word_dict, pos_dict
                  padding=False, word_embeddings=None):
         super().__init__()
         self.subset = subset  # One of the following: [train, test]
-        self.file = dir_path + subset + ".labeled"  # TODO in HW2 change to .labeled or unlabeled
+        self.file = dir_path + subset + ".labeled"  # TODO in HW2 changed to .labeled or unlabeled
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
+        # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
         if word_embeddings:
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
         else:
@@ -46,7 +78,7 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset
     @staticmethod
     def init_word_embeddings(word_dict):
         glove = Vocab(Counter(word_dict), vectors="glove.6B.300d", specials=SPECIAL_TOKENS)
-        return glove.stoi, glove.itos, glove.vectors
+        return glove.stoi, glove.itos, glove.vectors  # For some reason, the indexes are reversed
 
     def get_word_embeddings(self):
         return self.word_idx_mappings, self.idx_word_mappings, self.word_vectors
@@ -66,7 +98,7 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset
     def get_pos_vocab(self):
         return self.pos_idx_mappings, self.idx_pos_mappings
 
-    def convert_sentences_to_dataset(self, padding):
+    def convert_sentences_to_dataset(self, padding):  # TODO still not using padding
         sentence_word_idx_list = list()
         sentence_pos_idx_list = list()
         sentence_len_list = list()
@@ -100,37 +132,6 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset
         return {i: sample_tuple for i, sample_tuple in enumerate(zip(sentence_word_idx_list,
                                                                      sentence_pos_idx_list,
                                                                      sentence_len_list))}
-
-
-class ParserDataReader:
-    def __init__(self, file, word_dict, pos_dict):
-        self.file = file
-        self.word_dict = word_dict
-        self.pos_dict = pos_dict
-        self.sentences = []
-        self.__readData__()
-
-    def __readData__(self):
-        """main reader function which also populates the class data structures"""
-        with open(self.file, 'r') as f:
-            cur_sentence = []
-            for line in f:
-                if line == '\n':
-                    self.sentences.append(cur_sentence)
-                    cur_sentence = []
-                    continue
-                line_splitted = line.split('\t')
-                assert len(line_splitted) >= 6
-                token_counter = line_splitted[0]
-                token = line_splitted[1]
-                token_pos = line_splitted[3]
-                token_head = line_splitted[6]
-                cur_sentence.append((token_counter, token, token_pos, token_head))
-        pass
-
-    def get_num_sentences(self):
-        """returns num of sentences in data"""
-        return len(self.sentences)
 
 
 def generate_dicts(file_list):
