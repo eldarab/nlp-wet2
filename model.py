@@ -57,6 +57,7 @@ class MLPScorer(nn.Module):
                 score_matrix[i][j] = x
         return score_matrix
 
+    # alternative I started thinking about... -Eldar
     def forward2(self, input):
         input = input.view(input.shape[0], input.shape[2])
         n = input.shape[0] + 1  # including ROOT
