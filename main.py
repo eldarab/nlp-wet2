@@ -3,6 +3,7 @@ from data import ParserDataset
 from data import generate_dicts
 from torch.utils.data.dataloader import DataLoader
 import numpy as np
+from model import KiperwasserDependencyParser
 
 
 data_dir = './data/'
@@ -19,6 +20,12 @@ test_dataloader = DataLoader(test, shuffle=False)
 
 # debugging
 print('=' * 20, 'Debugging', '=' * 20)
+
+DNN = KiperwasserDependencyParser(2, len(word_dict), train.word_vectors.shape[1], len(pos_dict), 25, 100, 100)
+sentence0 = train.sentences_dataset[0]
+output = DNN.forward(sentence0)
+output2 = output.detach().numpy()
+
 test_word_vectors_np = test.word_vectors.numpy()
 word_vectors_with_zero_norm = 0
 for i, word_vector in enumerate(test_word_vectors_np):

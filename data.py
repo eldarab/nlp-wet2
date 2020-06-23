@@ -45,7 +45,7 @@ class ParserDataReader:
         return len(self.sentences)
 
 
-class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset (Ctrl+Q is your friend)
+class ParserDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,  # TODO why this gets word_dict, pos_dict
                  padding=False, word_embeddings=None):
         super().__init__()

@@ -1,6 +1,6 @@
 """
 The code below belongs to the AllenNLP library and was ported out of it for the HW assignment purposes.
-Documentation: https://allenai.github.io/allennlp-docs/api/allennlp.nn.chu_liu_edmonds.html
+Documentation: http://docs.allennlp.org/v0.9.0/api/allennlp.nn.chu_liu_edmonds.html
 GitHub: https://github.com/allenai/allennlp/blob/master/allennlp/nn/chu_liu_edmonds.py
 """
 
@@ -323,6 +323,5 @@ def test_chu_liu_edmonds():
     print(f"Test passed successfully: {mst}")
 
 
-if __name__ == "__main__":
-    test_chu_liu_edmonds()
+test_chu_liu_edmonds()
 

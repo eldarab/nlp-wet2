@@ -5,58 +5,73 @@ import numpy as np
 
 
 class KiperwasserDependencyParser(nn.Module):
-    def __init__(self, word_vec_dim, word_embedding_hidden_size, lstm_hidden_layers, pos_vec_dim, encoder_hidden_size,
-                 pos_embedding_hidden_size):
+    def __init__(self, lstm_hidden_layers, word_vocab_size, word_embedding_size, pos_vocab_size,
+                 pos_embedding_size, encoder_hidden_size, mlp_hidden_dim, word_embeddings=None):
         super(KiperwasserDependencyParser, self).__init__()
-
-        # embedding layer for words (can be new or pre-trained - word2vec/glove)
-        self.word_embedding = nn.LSTM(input_size=word_vec_dim, hidden_size=word_embedding_hidden_size,
-                                      num_layers=lstm_hidden_layers, bidirectional=True)
-
-        # embedding layer for POS tags
-        self.pos_embedding = nn.LSTM(input_size=pos_vec_dim, hidden_size=pos_embedding_hidden_size,
-                                     num_layers=lstm_hidden_layers, bidirectional=True)
-
+        if word_embeddings:
+            self.word_embedding = nn.Embedding.from_pretrained(word_embeddings, freeze=False)
+        else:
+            self.word_embedding = nn.Embedding(word_vocab_size, word_embedding_size)
+        self.pos_embedding = nn.Embedding(pos_vocab_size, pos_embedding_size)
         self.hidden_dim = self.word_embedding.embedding_dim + self.pos_embedding.embedding_dim
-
-        # BiLSTM module which is fed with word+pos embeddings and outputs hidden representations
         self.encoder = nn.LSTM(input_size=self.hidden_dim, hidden_size=encoder_hidden_size,
                                num_layers=lstm_hidden_layers, bidirectional=True)
-
-        # Implement a sub-module to calculate the scores for all possible edges in sentence dependency graph
-        self.edge_scorer =
-        self.decoder = decode_mst  # This is used to produce the maximum spannning tree during inference
-        self.loss_function =  # Implement the loss function described above
+        self.edge_scorer = MLPScorer(4 * encoder_hidden_size, mlp_hidden_dim)
+        self.decoder = decode_mst
+        # self.loss_function =  # Implement the loss function described above
 
     def forward(self, sentence):
-        word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence  # TODO turn _ to sentence_len if turned out to be useful
+        word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence  # TODO padding
 
-        # Pass word_idx and pos_idx through their embedding layers
-        sentence_word_embedded = self.word_embedding(word_idx_tensor)
-        sentence_pos_embedded = self.pos_embedding(pos_idx_tensor)
+        words_embedded = self.word_embedding(word_idx_tensor)                                       # [seq_length, word_embedding_size]
+        poss_embedded = self.pos_embedding(pos_idx_tensor)                                          # [seq_length, pos_embedding_size]
+        embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)     # [seq_length, batch_size, hidden_dim]
+        lstm_out, _ = self.encoder(embeds)                                                          # [seq_length, batch_size, 2*hidden_dim]
+        score_matrix = self.edge_scorer(lstm_out)                                                   # [seq_length, seq_length]
 
-        # Concat both embedding outputs
-        word_pos_concat = torch.cat((sentence_word_embedded, sentence_pos_embedded), dim=0)
-
-        # Get Bi-LSTM hidden representation for each word+pos in sentence
-        word_pos_hidden_rep = self.encoder(word_pos_concat)
-
-        # Get score for each possible edge in the parsing graph, construct score matrix
-
+        return score_matrix  # TODO DELETE THIS KAKI
         # Use Chu-Liu-Edmonds to get the predicted parse tree T' given the calculated score matrix
 
         # Calculate the negative log likelihood loss described above
 
         # return loss, predicted_tree
 
-def softmax(s, x, theta):
-    """
-    Calculates the probability of a word to be a head word, TODO given the modifier??.
-    :param s: S^i_{h,m}
-    :param x: X^i
-    :param theta: theta
-    :return:
-    """
+
+class MLPScorer(nn.Module):
+    def __init__(self, input_dim, hidden_dim):
+        super(MLPScorer, self).__init__()
+        self.W1 = nn.Linear(in_features=input_dim, out_features=hidden_dim)
+        self.activation = nn.functional.tanh
+        self.W2 = nn.Linear(in_features=hidden_dim, out_features=1)  # output is MLP score
+
+    def forward(self, input):
+        input = input.view(input.shape[0], input.shape[2])
+        n = input.shape[0]
+        score_matrix = torch.empty(n, n)
+        for i in range(n):
+            for j in range(n):
+                v = torch.cat((input[i], input[j])).unsqueeze(0)
+                x = self.W1(v)
+                x = self.activation(x)
+                x = self.W2(x)
+                score_matrix[i][j] = x
+        return score_matrix
+
+    def forward2(self, input):
+        input = input.view(input.shape[0], input.shape[2])
+        n = input.shape[0] + 1  # including ROOT
+        score_matrix = torch.empty(n, n)
+        for i in range(n):
+            for j in range(n):
+                if i == j or j == 0:
+                    score_matrix[i][j] = 0.0
+                    continue
+                v = torch.cat((input[i], input[j])).unsqueeze(0)
+                x = self.W1(v)
+                x = self.activation(x)
+                x = self.W2(x)
+                score_matrix[i][j] = x
+        return score_matrix
 
 
 # TODO should we use the predefined NLLLoss of pytorch?
