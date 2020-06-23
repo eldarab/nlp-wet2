@@ -20,6 +20,7 @@ class DnnParser(nn.Module):
         return x
 
 
+# TODO should we use the predefined NLLLoss of pytorch?
 def NLLLoss(D):
     for x, y in D:
         pass

@@ -102,10 +102,12 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset (Ctrl+
         sentence_word_idx_list = list()
         sentence_pos_idx_list = list()
         sentence_len_list = list()
+        sentence_true_heads_list = list()
         for sentence_idx, sentence in enumerate(self.datareader.sentences):
             words_idx_list = []
             pos_idx_list = []
-            for _, word, pos, _ in sentence:
+            true_tree_heads = []
+            for modifier_idx, word, pos, head_idx in sentence:
                 if word not in self.word_idx_mappings:  # TODO what happens if word has no mapping?
                     words_idx_list.append(self.word_idx_mappings.get(UNKNOWN_TOKEN))
                 else:
@@ -114,6 +116,7 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset (Ctrl+
                     pos_idx_list.append(self.pos_idx_mappings.get(UNKNOWN_TOKEN))
                 else:
                     pos_idx_list.append(self.pos_idx_mappings.get(pos))
+                true_tree_heads.append((head_idx, modifier_idx))
             sentence_len = len(words_idx_list)
             # if padding:
             #     while len(words_idx_list) < self.max_seq_len:
@@ -122,6 +125,7 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset (Ctrl+
             sentence_word_idx_list.append(torch.tensor(words_idx_list, dtype=torch.long, requires_grad=False))
             sentence_pos_idx_list.append(torch.tensor(pos_idx_list, dtype=torch.long, requires_grad=False))
             sentence_len_list.append(sentence_len)
+            sentence_true_heads_list.append(true_tree_heads)
 
         # if padding:
         #     all_sentence_word_idx = torch.tensor(sentence_word_idx_list, dtype=torch.long)
@@ -131,7 +135,8 @@ class ParserDataset(Dataset):  # TODO clarify to yourself what is Dataset (Ctrl+
 
         return {i: sample_tuple for i, sample_tuple in enumerate(zip(sentence_word_idx_list,
                                                                      sentence_pos_idx_list,
-                                                                     sentence_len_list))}
+                                                                     sentence_len_list,
+                                                                     sentence_true_heads_list))}
 
 
 def generate_dicts(file_list):
