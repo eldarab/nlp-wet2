@@ -56,16 +56,17 @@ class ParserDataset(Dataset):
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
         # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
-        if word_embeddings:
+        if word_embeddings:  # TODO allow for word embeddings to be created by nn.embedding
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
+            self.word_vector_dim = self.word_vectors.size(-1)
         else:
-            self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = self.init_word_embeddings(
-                self.datareader.word_dict)
-        self.pos_idx_mappings, self.idx_pos_mappings = self.init_pos_vocab(self.datareader.pos_dict)
+            self.word_idx_mappings, self.idx_word_mappings = self.init_word_embeddings(self.datareader.word_dict)
+            self.word_vectors = None
+            self.word_vector_dim = None
 
+        self.pos_idx_mappings, self.idx_pos_mappings = self.init_pos_vocab(self.datareader.pos_dict)
         self.pad_idx = self.word_idx_mappings.get(PAD_TOKEN)
         self.unknown_idx = self.word_idx_mappings.get(UNKNOWN_TOKEN)
-        self.word_vector_dim = self.word_vectors.size(-1)
         self.sentence_lens = [len(sentence) for sentence in self.datareader.sentences]
         self.max_seq_len = max(self.sentence_lens)
         self.sentences_dataset = self.convert_sentences_to_dataset(padding)
@@ -79,6 +80,11 @@ class ParserDataset(Dataset):
 
     @staticmethod
     def init_word_embeddings(word_dict):
+        vocab = Vocab(Counter(word_dict), specials=SPECIAL_TOKENS)
+        return vocab.stoi, vocab.itos  # For some reason, the indexes are reversed
+
+    @staticmethod
+    def init_glove_word_embeddings(word_dict):
         glove = Vocab(Counter(word_dict), vectors="glove.6B.300d", specials=SPECIAL_TOKENS)
         return glove.stoi, glove.itos, glove.vectors  # For some reason, the indexes are reversed
 
@@ -184,5 +190,16 @@ def init_vocab_freq(list_of_paths):
                 pos = line_splitted[3]
                 word_dict[word] += 1
                 pos_dict[pos] += 1
-
     return word_dict, pos_dict
+
+
+def init_train_freq(list_of_train_paths):
+    word_dict = defaultdict(int)
+    for file_path in list_of_train_paths:
+        with open(file_path) as f:
+            for line in f:
+                if line == '\n':
+                    continue
+                word = line.split('\t')[1]
+                word_dict[word] += 1
+    return word_dict
