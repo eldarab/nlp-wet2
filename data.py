@@ -36,10 +36,10 @@ class ParserDataReader:
                     continue
                 line_splitted = line.split('\t')
                 assert len(line_splitted) >= 6
-                token_counter = line_splitted[0]
+                token_counter = int(line_splitted[0])
                 token = line_splitted[1]
                 token_pos = line_splitted[3]
-                token_head = line_splitted[6]
+                token_head = int(line_splitted[6])
                 cur_sentence.append((token_counter, token, token_pos, token_head))
 
     def get_num_sentences(self):
@@ -74,8 +74,8 @@ class ParserDataset(Dataset):
         return len(self.sentences_dataset)
 
     def __getitem__(self, index):
-        word_embed_idx, pos_embed_idx, sentence_len = self.sentences_dataset[index]
-        return word_embed_idx, pos_embed_idx, sentence_len
+        word_embed_idx, pos_embed_idx, sentence_len, true_tree_heads = self.sentences_dataset[index]
+        return word_embed_idx, pos_embed_idx, sentence_len, true_tree_heads
 
     @staticmethod
     def init_word_embeddings(word_dict):

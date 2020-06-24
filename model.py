@@ -18,7 +18,7 @@ class KiperwasserDependencyParser(nn.Module):
                                num_layers=lstm_hidden_layers, bidirectional=True)
         self.edge_scorer = MLPScorer(4 * encoder_hidden_size, mlp_hidden_dim)
         self.decoder = decode_mst
-        # self.loss_function =  # Implement the loss function described above
+        self.loss_function = NLLLoss
 
     def forward(self, sentence):
         word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence  # TODO padding
@@ -28,14 +28,10 @@ class KiperwasserDependencyParser(nn.Module):
         embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)     # [seq_length, batch_size, hidden_dim]
         lstm_out, _ = self.encoder(embeds)                                                          # [seq_length, batch_size, 2*hidden_dim]
         score_matrix = self.edge_scorer(lstm_out)                                                   # [seq_length, seq_length]
-        parse_tree = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)  # TODO requires grad?
+        predicted_tree, _ = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)
+        loss = self.loss_function(score_matrix, true_tree_heads)
 
-        return parse_tree  # TODO DELETE THIS KAKI
-        # Use Chu-Liu-Edmonds to get the predicted parse tree T' given the calculated score matrix
-
-        # Calculate the negative log likelihood loss described above
-
-        # return loss, predicted_tree
+        return loss, predicted_tree
 
 
 class MLPScorer(nn.Module):
@@ -45,7 +41,7 @@ class MLPScorer(nn.Module):
         self.activation = nn.functional.tanh
         self.W2 = nn.Linear(in_features=hidden_dim, out_features=1)  # output is MLP score
 
-    def forward(self, input):
+    def forward(self, input):  # TODO maybe construct the score matrix in the main NN
         input = input.view(input.shape[0], input.shape[2])
         n = input.shape[0]
         score_matrix = torch.empty(n, n)
@@ -58,24 +54,12 @@ class MLPScorer(nn.Module):
                 score_matrix[i][j] = x
         return score_matrix
 
-    # alternative I started thinking about... -Eldar
-    # def forward2(self, input):
-    #     input = input.view(input.shape[0], input.shape[2])
-    #     n = input.shape[0] + 1  # including ROOT
-    #     score_matrix = torch.empty(n, n)  # TODO make this an np array? ching-chong receives np.
-    #     for i in range(n):
-    #         for j in range(n):
-    #             if i == j or j == 0:
-    #                 score_matrix[i][j] = 0.0
-    #                 continue
-    #             v = torch.cat((input[i], input[j])).unsqueeze(0)
-    #             x = self.W1(v)
-    #             x = self.activation(x)
-    #             x = self.W2(x)
-    #             score_matrix[i][j] = x
-    #     return score_matrix
 
-
-# TODO should we use the predefined NLLLoss of pytorch?
-def NLLLoss(D, theta):
-    loss = nn.NLLLoss()
+def NLLLoss(score_matrix, true_tree_arcs):
+    log_softmax = nn.LogSoftmax(dim=0)
+    prob_score_matrix = log_softmax(score_matrix)
+    size_Y = len(true_tree_arcs)
+    log_softmax_sum = 0
+    for h, m in true_tree_arcs:
+        log_softmax_sum += prob_score_matrix[h][m]
+    return (-1 / size_Y) * log_softmax_sum
