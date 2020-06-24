@@ -28,8 +28,9 @@ class KiperwasserDependencyParser(nn.Module):
         embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)     # [seq_length, batch_size, hidden_dim]
         lstm_out, _ = self.encoder(embeds)                                                          # [seq_length, batch_size, 2*hidden_dim]
         score_matrix = self.edge_scorer(lstm_out)                                                   # [seq_length, seq_length]
+        parse_tree = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)  # TODO requires grad?
 
-        return score_matrix  # TODO DELETE THIS KAKI
+        return parse_tree  # TODO DELETE THIS KAKI
         # Use Chu-Liu-Edmonds to get the predicted parse tree T' given the calculated score matrix
 
         # Calculate the negative log likelihood loss described above
@@ -58,21 +59,21 @@ class MLPScorer(nn.Module):
         return score_matrix
 
     # alternative I started thinking about... -Eldar
-    def forward2(self, input):
-        input = input.view(input.shape[0], input.shape[2])
-        n = input.shape[0] + 1  # including ROOT
-        score_matrix = torch.empty(n, n)
-        for i in range(n):
-            for j in range(n):
-                if i == j or j == 0:
-                    score_matrix[i][j] = 0.0
-                    continue
-                v = torch.cat((input[i], input[j])).unsqueeze(0)
-                x = self.W1(v)
-                x = self.activation(x)
-                x = self.W2(x)
-                score_matrix[i][j] = x
-        return score_matrix
+    # def forward2(self, input):
+    #     input = input.view(input.shape[0], input.shape[2])
+    #     n = input.shape[0] + 1  # including ROOT
+    #     score_matrix = torch.empty(n, n)  # TODO make this an np array? ching-chong receives np.
+    #     for i in range(n):
+    #         for j in range(n):
+    #             if i == j or j == 0:
+    #                 score_matrix[i][j] = 0.0
+    #                 continue
+    #             v = torch.cat((input[i], input[j])).unsqueeze(0)
+    #             x = self.W1(v)
+    #             x = self.activation(x)
+    #             x = self.W2(x)
+    #             score_matrix[i][j] = x
+    #     return score_matrix
 
 
 # TODO should we use the predefined NLLLoss of pytorch?

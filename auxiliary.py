@@ -1,4 +1,3 @@
-
 def add_or_append(dictionary, item, size=1):
     """
     Add size to the key item if it is in the dictionary, otherwise appends the key to the dictionary

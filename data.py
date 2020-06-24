@@ -4,14 +4,17 @@ import torch
 from torchtext.vocab import Vocab
 from torch.utils.data.dataset import Dataset, TensorDataset
 from pathlib import Path
-from collections import Counter
+from collections import Counter, defaultdict
 
 # These are not relevant for our POS tagger but might be useful for HW2
 UNKNOWN_TOKEN = "<unk>"
 PAD_TOKEN = "<pad>"  # Optional: this is used to pad a batch of sentences in different lengths.
 # ROOT_TOKEN = PAD_TOKEN  # this can be used if you are not padding your batches
 ROOT_TOKEN = "<root>"  # use this if you are padding your batches and want a special token for ROOT
-SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # TODO if we decide to have a special root token, than add it here
+SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # did not add ROOT_TOKEN to here because it's already in the sentence
+
+ROOT_TOKEN_COUNTER = 0
+ROOT_TOKEN_HEAD = -1
 
 
 class ParserDataReader:
@@ -25,11 +28,11 @@ class ParserDataReader:
     def __readData__(self):
         """main reader function which also populates the class data structures"""
         with open(self.file, 'r') as f:
-            cur_sentence = []
+            cur_sentence = [(ROOT_TOKEN_COUNTER, ROOT_TOKEN, ROOT_TOKEN, ROOT_TOKEN_HEAD)]
             for line in f:
                 if line == '\n':
                     self.sentences.append(cur_sentence)
-                    cur_sentence = []
+                    cur_sentence = [(ROOT_TOKEN_COUNTER, ROOT_TOKEN, ROOT_TOKEN, ROOT_TOKEN_HEAD)]
                     continue
                 line_splitted = line.split('\t')
                 assert len(line_splitted) >= 6
@@ -38,7 +41,6 @@ class ParserDataReader:
                 token_pos = line_splitted[3]
                 token_head = line_splitted[6]
                 cur_sentence.append((token_counter, token, token_pos, token_head))
-        pass
 
     def get_num_sentences(self):
         """returns num of sentences in data"""
@@ -139,28 +141,48 @@ class ParserDataset(Dataset):
                                                                      sentence_true_heads_list))}
 
 
-def generate_dicts(file_list):
-    """
-    Extracts words and tags vocabularies.
-    :return: word2idx, tag2idx, idx2word, idx2tag
-    """
-    word2idx_dict = {}
-    pos2idx_dict = {}
-    for file in file_list:
-        with open(file, 'r') as f:
-            word_counter, pos_counter = 0, 0
-            for line in f:  # each line in the test data corresponds to at most one word
+# def generate_dicts(file_list):
+#     """
+#     Extracts words and tags vocabularies.
+#     :return: word2idx, tag2idx, idx2word, idx2tag
+#     """
+#     word2idx_dict = {ROOT_TOKEN: 0}
+#     pos2idx_dict = {ROOT_TOKEN: 0}
+#     for file in file_list:
+#         with open(file, 'r') as f:
+#             word_counter, pos_counter = 1, 1  # already used 0 for ROOT_TOKEN
+#             for line in f:  # each line in the test data corresponds to at most one word
+#                 if line == '\n':
+#                     continue
+#                 line_splitted = line.split('\t')
+#                 assert len(line_splitted) >= 6
+#                 word = line_splitted[1]
+#                 pos = line_splitted[3]
+#                 if word not in word2idx_dict:
+#                     word2idx_dict[word] = word_counter
+#                     word_counter += 1
+#                 if pos not in pos2idx_dict:
+#                     pos2idx_dict[pos] = pos_counter
+#                     pos_counter += 1
+#
+#     return word2idx_dict, pos2idx_dict
+
+
+def init_vocab_freq(list_of_paths):
+    word_dict = defaultdict(int)
+    pos_dict = defaultdict(int)
+    for file_path in list_of_paths:
+        with open(file_path) as f:
+            for line in f:
                 if line == '\n':
+                    word_dict[ROOT_TOKEN] += 1
+                    pos_dict[ROOT_TOKEN] += 1
                     continue
                 line_splitted = line.split('\t')
                 assert len(line_splitted) >= 6
                 word = line_splitted[1]
                 pos = line_splitted[3]
-                if word not in word2idx_dict:
-                    word2idx_dict[word] = word_counter
-                    word_counter += 1
-                if pos not in pos2idx_dict:
-                    pos2idx_dict[pos] = pos_counter
-                    pos_counter += 1
+                word_dict[word] += 1
+                pos_dict[pos] += 1
 
-    return word2idx_dict, pos2idx_dict
+    return word_dict, pos_dict
