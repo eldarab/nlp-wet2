@@ -21,10 +21,10 @@ test_dataloader = DataLoader(test, shuffle=False)
 
 
 epochs = 1
-lstm_hidden_layers = 125
-word_vocab_size = len(word_dict)
+lstm_hidden_layers = 2
+word_vocab_size = len(train.word_idx_mappings)
 word_embedding_size = 100
-pos_vocab_size = len(pos_dict)
+pos_vocab_size = len(train.pos_idx_mappings)
 pos_embedding_size = 25
 encoder_hidden_size = 300
 mlp_hidden_dim = 100
@@ -46,7 +46,7 @@ if cuda_available:
 
 # We will be using a simple SGD optimizer to minimize the loss function
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-acumulate_grad_steps = 50  # This is the actual batch_size, while we officially use batch_size=1
+accumulate_grad_steps = 50  # This is the actual batch_size, while we officially use batch_size=1
 
 # Training start
 print("Training Started")
@@ -60,27 +60,21 @@ for epoch in range(epochs):
         i += 1
 
         loss, predicted_tree = model(input_data)
-        # tag_scores = tag_scores.unsqueeze(0).permute(0, 2, 1)
-        # print("tag_scores shape -", tag_scores.shape)
-        # print("pos_idx_tensor shape -", pos_idx_tensor.shape)
-        loss = loss_function(tag_scores, pos_idx_tensor.to(device))
-        loss = loss / acumulate_grad_steps
+        loss = loss / accumulate_grad_steps
         loss.backward()
 
-        if i % acumulate_grad_steps == 0:
+        if i % accumulate_grad_steps == 0:
             optimizer.step()
             model.zero_grad()
+
         printable_loss += loss.item()
-        _, indices = torch.max(tag_scores, 1)
-        # print("tag_scores shape-", tag_scores.shape)
-        # print("indices shape-", indices.shape)
-        # acc += indices.eq(pos_idx_tensor.view_as(indices)).mean().item()
-        acc += torch.mean(torch.tensor(pos_idx_tensor.to("cpu") == indices.to("cpu"), dtype=torch.float))
+        # acc += torch.mean(torch.tensor(pos_idx_tensor.to("cpu") == indices.to("cpu"), dtype=torch.float))
+
     printable_loss = printable_loss / len(train)
     acc = acc / len(train)
     loss_list.append(float(printable_loss))
     accuracy_list.append(float(acc))
-    test_acc = evaluate()
+    # test_acc = evaluate()
     e_interval = i
     print("Epoch {} Completed,\tLoss {}\tAccuracy: {}\t Test Accuracy: {}".format(epoch + 1,
                                                                                   np.mean(loss_list[-e_interval:]),
