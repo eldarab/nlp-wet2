@@ -1,6 +1,5 @@
 from data import ParserDataReader
-from data import ParserDataset
-from data import init_vocab_freq
+from data import init_vocab_freq, init_train_freq, ParserDataset
 from torch.utils.data.dataloader import DataLoader
 import numpy as np
 from model import KiperwasserDependencyParser
@@ -10,9 +9,10 @@ data_dir = './data/'
 train_path = data_dir + 'train.labeled'
 test_path = data_dir + 'test.labeled'
 comp_path = data_dir + 'comp.unlabeled'
+data_paths = [train_path, test_path]
 
-paths_list = [train_path, test_path]
-word_dict, pos_dict = init_vocab_freq(paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
+word_dict, pos_dict = init_vocab_freq(data_paths)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
+train_word_dict = init_train_freq([train_path])
 train = ParserDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
 train_dataloader = DataLoader(train, shuffle=True)
 test = ParserDataset(word_dict, pos_dict, data_dir, 'test', padding=False)
@@ -21,7 +21,7 @@ test_dataloader = DataLoader(test, shuffle=False)
 # debugging
 print('=' * 20, 'Debugging', '=' * 20)
 
-DNN = KiperwasserDependencyParser(2, len(word_dict), train.word_vectors.shape[1], len(pos_dict), 25, 100, 100)
+DNN = KiperwasserDependencyParser(2, train.vocab_size, 300, len(pos_dict), 25, 100, 100)
 sentence0 = train.sentences_dataset[0]
 output = DNN(sentence0)
 
