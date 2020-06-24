@@ -60,7 +60,7 @@ for epoch in range(epochs):
         i += 1
 
         loss, predicted_tree = model(input_data)
-        tag_scores = tag_scores.unsqueeze(0).permute(0, 2, 1)
+        # tag_scores = tag_scores.unsqueeze(0).permute(0, 2, 1)
         # print("tag_scores shape -", tag_scores.shape)
         # print("pos_idx_tensor shape -", pos_idx_tensor.shape)
         loss = loss_function(tag_scores, pos_idx_tensor.to(device))
