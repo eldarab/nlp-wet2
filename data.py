@@ -49,8 +49,13 @@ class ParserDataReader:
 
 class ParserDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,  # TODO why this gets word_dict, pos_dict
-                 padding=False, word_embeddings=None):
+                 padding=False, word_embeddings=None, alpha=0.5, train_word_freq=None):
         super().__init__()
+        assert 'test' in subset or train_word_freq is not None
+        self.alpha = alpha
+        self.train_word_freq = train_word_freq
+
+        assert 'train' in subset or 'test' in subset
         self.subset = subset  # One of the following: [train, test]
         self.file = dir_path + subset + ".labeled"  # TODO in HW2 changed to .labeled or unlabeled
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
@@ -109,19 +114,27 @@ class ParserDataset(Dataset):
         sentence_pos_idx_list = list()
         sentence_len_list = list()
         sentence_true_heads_list = list()
+
         for sentence_idx, sentence in enumerate(self.datareader.sentences):
             words_idx_list = []
             pos_idx_list = []
             true_tree_heads = []
             for modifier_idx, word, pos, head_idx in sentence:
+                # TODO reconsider enabling dropout on root
+                if self.subset == 'train' and self.dropout(word):
+                    word = UNKNOWN_TOKEN
+                    pos = UNKNOWN_TOKEN
+
                 if word not in self.word_idx_mappings:  # TODO what happens if word has no mapping?
                     words_idx_list.append(self.word_idx_mappings.get(UNKNOWN_TOKEN))
                 else:
                     words_idx_list.append(self.word_idx_mappings.get(word))
+
                 if pos not in self.pos_idx_mappings:  # TODO what happens if POS has no mapping?
                     pos_idx_list.append(self.pos_idx_mappings.get(UNKNOWN_TOKEN))
                 else:
                     pos_idx_list.append(self.pos_idx_mappings.get(pos))
+
                 true_tree_heads.append((head_idx, modifier_idx))
             sentence_len = len(words_idx_list)
             # if padding:
@@ -143,6 +156,10 @@ class ParserDataset(Dataset):
                                                                      sentence_pos_idx_list,
                                                                      sentence_len_list,
                                                                      sentence_true_heads_list))}
+
+    def dropout(self, word):
+        drop_prob = self.alpha/(self.alpha+self.train_word_freq[word])
+        return torch.bernoulli(torch.tensor(drop_prob))
 
 
 # def generate_dicts(file_list):

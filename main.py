@@ -17,9 +17,9 @@ comp_path = data_dir + 'comp.unlabeled'
 # converting raw data to dedicated data objects
 paths_list = [train_path, test_path]
 word_dict, pos_dict = init_vocab_freq(paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
-# train_word_dict = init_train_freq([train_path])
+train_word_dict = init_train_freq([train_path])
 
-train_dataset = ParserDataset(word_dict, pos_dict, data_dir, 'train', padding=False)
+train_dataset = ParserDataset(word_dict, pos_dict, data_dir, 'train', padding=False, train_word_freq=train_word_dict)
 train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
 test_dataset = ParserDataset(word_dict, pos_dict, data_dir, 'test', padding=False)
 test_dataloader = DataLoader(test_dataset, shuffle=False)
@@ -89,6 +89,7 @@ for epoch in range(epochs):
     acc = 0
     printable_loss = 0
 
+    # TODO initialize loss_list and accuracy_list to be empty vectors
     for batch_idx, input_data in enumerate(train_dataloader):
         loss, predicted_tree = model(input_data)
         loss = loss / accumulate_grad_steps  # TODO why we do this?
@@ -110,7 +111,7 @@ for epoch in range(epochs):
     acc = acc / len(train_dataset)
     loss_list.append(float(printable_loss))
     accuracy_list.append(float(acc))
-    e_interval = len(train_dataloader)
+    e_interval = len(train_dataloader)  # this variable is the number of sample, but our samples are of size 1
     print(f'Epoch {epoch+1} completted, \t Loss{np.mean(loss_list[-e_interval:])}')
     # test_acc = evaluate()
     # test_acc = 1
