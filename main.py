@@ -1,11 +1,11 @@
-from data import ParserDataset
-from data import init_vocab_freq, init_train_freq
-from torch.utils.data.dataloader import DataLoader
+import torch
 import numpy as np
 from model import KiperwasserDependencyParser
 from torch import optim
-import torch
 from auxiliary import convert_tree_to_list
+from data import ParserDataset
+from data import init_vocab_freq, init_train_freq
+from torch.utils.data.dataloader import DataLoader
 
 
 # data paths
