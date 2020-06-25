@@ -1,6 +1,7 @@
 from chu_liu_edmonds import decode_mst
 from torch import nn
 import torch
+from warnings import warn
 import numpy as np
 
 
@@ -9,6 +10,8 @@ class KiperwasserDependencyParser(nn.Module):
                  word_vocab_size=None, word_embedding_size=None, word_embeddings=None):
         super(KiperwasserDependencyParser, self).__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if self.device == "cpu":
+            warn('Using CPU!')
         if word_embeddings:
             self.word_embedding = nn.Embedding.from_pretrained(word_embeddings, freeze=False)
         else:

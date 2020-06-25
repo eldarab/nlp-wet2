@@ -48,33 +48,55 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
                          np.mean(train_acc_list[-e_interval:]),
                          test_acc))
 
-        return loss_list, train_acc_list, test_acc_list
+    return loss_list, train_acc_list, test_acc_list
 
 
-def train_model(model_name, paths_list, word_embedding_size=100, pos_embedding_size=25, mlp_hidden_dim=100,
-                lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, epochs=10, lr=0.1, batch_size=50,
-                CUDA=True, print_epochs=True):
+def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_embedding_size=25, mlp_hidden_dim=100,
+                lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, epochs=10, lr=0.1,
+                batch_size=50, CUDA=True, print_epochs=True):
+    """
+    
+    :param word_embeddings:
+    :param model_name:
+    :param data_dir: 
+    :param filenames: exactly the format [train_filename, test_filename]
+    :param word_embedding_size: 
+    :param pos_embedding_size: 
+    :param mlp_hidden_dim: 
+    :param lstm_hidden_layers: 
+    :param encoder_hidden_size: 
+    :param alpha: 
+    :param epochs: 
+    :param lr: 
+    :param batch_size: 
+    :param CUDA: 
+    :param print_epochs: 
+    :return: 
+    """
+
+    paths_list = [data_dir + filenames[0], data_dir + filenames[1]]
+
     # converting raw data to dedicated data objects
     word_dict, pos_dict = init_vocab_freq(paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
-
-    train_dataset = ParserDataset(word_dict, pos_dict, data_dir, 'train_300', padding=False)
+    train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
+                                  padding=False)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
-    test_dataset = ParserDataset(word_dict, pos_dict, data_dir, 'test_300', padding=False)
-    test_dataloader = DataLoader(test_dataset, shuffle=False)
+    test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False)  # for evaluation
 
+    # creating model
     word_vocab_size = len(train_dataset.word_idx_mappings)  # includes words from test
     pos_vocab_size = len(train_dataset.pos_idx_mappings)  # includes POSs from test
-
     word_embeddings = train_dataset.word_vectors
-
     model = KiperwasserDependencyParser(lstm_hidden_layers=lstm_hidden_layers,
                                         word_vocab_size=word_vocab_size,
                                         word_embedding_size=word_embedding_size,
                                         pos_vocab_size=pos_vocab_size,
                                         pos_embedding_size=pos_embedding_size,
                                         encoder_hidden_size=encoder_hidden_size,
-                                        mlp_hidden_dim=mlp_hidden_dim)
+                                        mlp_hidden_dim=mlp_hidden_dim,
+                                        word_embeddings=word_embeddings)
 
+    # training model
     if CUDA:
         cuda_available = torch.cuda.is_available()
         device = torch.device("cuda:0" if cuda_available else "cpu")
@@ -84,7 +106,6 @@ def train_model(model_name, paths_list, word_embedding_size=100, pos_embedding_s
             raise Exception('You requested to use CUDA but CUDA is not available')
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
-
     loss_list, train_acc_list, test_acc_list = train(epochs, batch_size, optimizer, train_dataset, train_dataloader,
                                                      test_dataset, model, print_epochs)
 

@@ -58,7 +58,7 @@ class ParserDataset(Dataset):
 
         assert 'train' in subset or 'test' in subset
         self.subset = subset  # One of the following: [train, test]
-        self.file = dir_path + subset + ".labeled"  # TODO in HW2 changed to .labeled or unlabeled
+        self.file = dir_path + subset  # TODO removed .labeled from here
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
         # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
@@ -161,33 +161,6 @@ class ParserDataset(Dataset):
     def dropout(self, word):
         drop_prob = self.alpha/(self.alpha+self.train_word_freq[word])
         return torch.bernoulli(torch.tensor(drop_prob))
-
-
-# def generate_dicts(file_list):
-#     """
-#     Extracts words and tags vocabularies.
-#     :return: word2idx, tag2idx, idx2word, idx2tag
-#     """
-#     word2idx_dict = {ROOT_TOKEN: 0}
-#     pos2idx_dict = {ROOT_TOKEN: 0}
-#     for file in file_list:
-#         with open(file, 'r') as f:
-#             word_counter, pos_counter = 1, 1  # already used 0 for ROOT_TOKEN
-#             for line in f:  # each line in the test data corresponds to at most one word
-#                 if line == '\n':
-#                     continue
-#                 line_splitted = line.split('\t')
-#                 assert len(line_splitted) >= 6
-#                 word = line_splitted[1]
-#                 pos = line_splitted[3]
-#                 if word not in word2idx_dict:
-#                     word2idx_dict[word] = word_counter
-#                     word_counter += 1
-#                 if pos not in pos2idx_dict:
-#                     pos2idx_dict[pos] = pos_counter
-#                     pos_counter += 1
-#
-#     return word2idx_dict, pos2idx_dict
 
 
 def init_vocab_freq(list_of_paths):
