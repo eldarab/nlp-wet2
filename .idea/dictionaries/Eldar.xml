@@ -1,10 +1,12 @@
 <component name="ProjectDictionaryState">
   <dictionary name="Eldar">
     <words>
+      <w>cuda</w>
       <w>dataloader</w>
       <w>datareader</w>
       <w>eyal</w>
       <w>kiperwasser</w>
+      <w>ndarray</w>
       <w>softmax</w>
       <w>splitted</w>
     </words>
