@@ -1,3 +1,5 @@
+import pickle
+import os
 from torch import optim
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
@@ -8,13 +10,21 @@ from model import KiperwasserDependencyParser
 import torch
 import matplotlib.pyplot as plt
 
+BREAK_THRESHOLD = 0.01
 
-def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataset, model, print_epochs=True):
+
+def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataset, model, save_path=None,
+          print_epochs=True):
     if print_epochs:
         print("Training Started")
-
+    if save_path:
+        os.mkdir(save_path)
     train_acc_list, test_acc_list, loss_list = [], [], []
     for epoch in range(epochs):
+        if epoch > 2:  # third epoch and beyond
+            if (abs(train_acc_list[-2] - train_acc_list[-1]) < BREAK_THRESHOLD) and\
+                    (abs(train_acc_list[-3] - train_acc_list[-2]) < BREAK_THRESHOLD):
+                break
         train_acc = 0
         epoch_loss = 0
 
@@ -47,6 +57,8 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
                          np.mean(loss_list[-e_interval:]),
                          np.mean(train_acc_list[-e_interval:]),
                          test_acc))
+        if save_path:
+            torch.save(model, save_path + '/epoch' + str(epoch) + '.eh')
 
     return loss_list, train_acc_list, test_acc_list
 
@@ -107,16 +119,14 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
             raise Exception('You requested to use CUDA but CUDA is not available')
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
+    save_path = save_dir + model_name
     loss_list, train_acc_list, test_acc_list = train(epochs, batch_size, optimizer, train_dataset, train_dataloader,
-                                                     test_dataset, model, print_epochs)
-
-    if save_dir:
-        torch.save(model, save_dir + model_name + '.eh')
+                                                     test_dataset, model, save_path=save_path, print_epochs=print_epochs)
 
     return loss_list, train_acc_list, test_acc_list
 
 
-def draw_graphs(loss_list, train_acc_list, test_acc_list):
+def draw_graphs(loss_list, train_acc_list, test_acc_list, save_path=None):
     plt.plot(train_acc_list, c="red", label="Train accuracy")
     plt.plot(test_acc_list, c="green", label="Test accuracy")
     plt.xlabel("Epochs")
@@ -129,3 +139,7 @@ def draw_graphs(loss_list, train_acc_list, test_acc_list):
     plt.ylabel("Value")
     plt.legend()
     plt.show()
+
+    if save_path:
+        with open(save_path, 'wb') as f:
+            pickle.dump((loss_list, train_acc_list, test_acc_list), f)

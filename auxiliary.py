@@ -28,6 +28,24 @@ def split(string, delimiters):
     return stack
 
 
+def write_report_header(report_path):
+    with open(report_path, 'w') as report:
+        report.write('model_name,word_embedding_size,pos_embedding_size,mlp_hidden_dim,lstm_hidden_layers,\
+                      encoder_hidden_size,alpha,word_embeddings,RNN_type,optimizer,epochs,lr,batch_size')
+        report.write('\n')
+
+
+def write_report_line(report_path, hp_dict):
+    """
+
+    :param report_path:
+    :param hp_dict: Hyper parameter dict
+    :return:
+    """
+    with open(report_path, 'a') as report:
+        report.write()
+
+
 def convert_tree_to_list(tree):
     """
     Converts a given tree to the format tree[modifier] = head.
@@ -39,10 +57,6 @@ def convert_tree_to_list(tree):
     for head, modifier in tree:
         tree_list.append(int(head))
     return tree_list
-
-
-def save_model(model):
-    pass
 
 # def generate_dicts(file_list):
 #     """
