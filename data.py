@@ -50,7 +50,7 @@ class ParserDataReader:
 
 class ParserDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,  # TODO why this gets word_dict, pos_dict
-                 padding=False, word_embeddings=None, alpha=0.5, train_word_freq=None):
+                 padding=False, word_embeddings=None, alpha=0.25, train_word_freq=None):
         super().__init__()
         assert 'test' in subset or train_word_freq is not None
         self.alpha = alpha

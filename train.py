@@ -2,7 +2,7 @@ from torch import optim
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
 from eval import UAS, evaluate
-from data import init_vocab_freq, ParserDataset
+from data import init_vocab_freq, ParserDataset, init_train_freq
 import numpy as np
 from model import KiperwasserDependencyParser
 import torch
@@ -53,25 +53,26 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
 
 def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_embedding_size=25, mlp_hidden_dim=100,
                 lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, epochs=10, lr=0.1,
-                batch_size=50, CUDA=True, print_epochs=True):
+                batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
     """
     
     :param word_embeddings:
     :param model_name:
-    :param data_dir: 
+    :param data_dir:
     :param filenames: exactly the format [train_filename, test_filename]
-    :param word_embedding_size: 
-    :param pos_embedding_size: 
-    :param mlp_hidden_dim: 
-    :param lstm_hidden_layers: 
-    :param encoder_hidden_size: 
-    :param alpha: 
-    :param epochs: 
-    :param lr: 
-    :param batch_size: 
-    :param CUDA: 
-    :param print_epochs: 
-    :return: 
+    :param word_embedding_size:
+    :param pos_embedding_size:
+    :param mlp_hidden_dim:
+    :param lstm_hidden_layers:
+    :param encoder_hidden_size:
+    :param alpha:
+    :param epochs:
+    :param lr:
+    :param batch_size:
+    :param CUDA:
+    :param print_epochs:
+    :param save_dir:
+    :return:
     """
 
     paths_list = [data_dir + filenames[0], data_dir + filenames[1]]
@@ -79,7 +80,7 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     # converting raw data to dedicated data objects
     word_dict, pos_dict = init_vocab_freq(paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
     train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
-                                  padding=False)
+                                  padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
     test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False)  # for evaluation
 
@@ -108,6 +109,9 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     optimizer = optim.Adam(model.parameters(), lr=lr)
     loss_list, train_acc_list, test_acc_list = train(epochs, batch_size, optimizer, train_dataset, train_dataloader,
                                                      test_dataset, model, print_epochs)
+
+    if save_dir:
+        torch.save(model, save_dir + model_name + '.eh')
 
     return loss_list, train_acc_list, test_acc_list
 

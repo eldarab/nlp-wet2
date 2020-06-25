@@ -41,6 +41,9 @@ def convert_tree_to_list(tree):
     return tree_list
 
 
+def save_model(model):
+    pass
+
 # def generate_dicts(file_list):
 #     """
 #     Extracts words and tags vocabularies.
