@@ -323,5 +323,5 @@ def test_chu_liu_edmonds():
     print(f"Test passed successfully: {mst}")
 
 
-test_chu_liu_edmonds()
+# test_chu_liu_edmonds()
 
