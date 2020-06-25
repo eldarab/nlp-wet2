@@ -40,7 +40,10 @@ class ParserDataReader:
                 token_counter = int(line_splitted[0])
                 token = line_splitted[1]
                 token_pos = line_splitted[3]
-                token_head = int(line_splitted[6])
+                if line_splitted[6].isnumeric():
+                    token_head = int(line_splitted[6])
+                else:
+                    token_head = line_splitted[6]
                 cur_sentence.append((token_counter, token, token_pos, token_head))
 
     def get_num_sentences(self):
@@ -49,15 +52,16 @@ class ParserDataReader:
 
 
 class ParserDataset(Dataset):
-    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,  # TODO why this gets word_dict, pos_dict
+    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1,  # TODO why this gets word_dict, pos_dict
                  padding=False, word_embeddings=None, alpha=0.25, train_word_freq=None):
         super().__init__()
         self.alpha = alpha
         self.train_word_freq = train_word_freq
+        self.min_freq = min_freq
 
-        assert 'train' in subset or 'test' in subset
+        assert 'train' in subset or 'test' in subset or 'comp' in subset
         self.subset = subset  # One of the following: [train, test]
-        self.file = dir_path + subset  # TODO removed .labeled from here
+        self.file = dir_path + subset
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
         # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
@@ -83,9 +87,8 @@ class ParserDataset(Dataset):
         word_embed_idx, pos_embed_idx, sentence_len, true_tree_heads = self.sentences_dataset[index]
         return word_embed_idx, pos_embed_idx, sentence_len, true_tree_heads
 
-    @staticmethod
-    def init_vocab(word_dict):
-        vocab = Vocab(Counter(word_dict), specials=SPECIAL_TOKENS)
+    def init_vocab(self, word_dict):
+        vocab = Vocab(Counter(word_dict), specials=SPECIAL_TOKENS, min_freq=self.min_freq)
         return vocab.stoi, vocab.itos
 
     @staticmethod

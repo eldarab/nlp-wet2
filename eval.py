@@ -1,6 +1,8 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
+from data import ParserDataset
+from model import KiperwasserDependencyParser
 
 
 def UAS(true_tree_arcs, pred_tree_arcs):
@@ -38,3 +40,11 @@ def evaluate(model, dataset):
             pred_tree = list(pred_tree)
             accuracy_sum += UAS(true_tree, pred_tree)
     return accuracy_sum / len(dataset)
+
+
+def predict_data(model: KiperwasserDependencyParser, dataset: ParserDataset):
+    with torch.no_grad():
+        predictions = []
+        for sentence in dataset:
+            predictions.append(model(sentence, False)[1])
+    return predictions

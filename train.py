@@ -9,7 +9,8 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataset, model, print_epochs=True):
+def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataset,
+          model: KiperwasserDependencyParser, print_epochs=True):
     if print_epochs:
         print("Training Started")
 
@@ -55,7 +56,6 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
                 lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, epochs=10, lr=0.1,
                 batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
     """
-    
     :param word_embeddings:
     :param model_name:
     :param data_dir:
@@ -78,7 +78,8 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     paths_list = [data_dir + filenames[0], data_dir + filenames[1]]
 
     # converting raw data to dedicated data objects
-    word_dict, pos_dict = init_vocab_freq(paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
+    word_dict, pos_dict = init_vocab_freq(
+        paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
     train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
                                   padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
@@ -113,7 +114,7 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     if save_dir:
         torch.save(model, save_dir + model_name + '.eh')
 
-    return loss_list, train_acc_list, test_acc_list
+    return model, loss_list, train_acc_list, test_acc_list
 
 
 def draw_graphs(loss_list, train_acc_list, test_acc_list):
