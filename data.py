@@ -15,6 +15,7 @@ SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # did not add ROOT_TOKEN to here be
 
 ROOT_TOKEN_COUNTER = 0
 ROOT_TOKEN_HEAD = -1
+# TODO consider lowering all words
 
 
 class ParserDataReader:
@@ -214,6 +215,7 @@ def init_train_freq(list_of_paths):
         with open(file_path) as f:
             for line in f:
                 if line == '\n':
+                    word_dict[ROOT_TOKEN] += 1
                     continue
                 word = line.split('\t')[1]
                 word_dict[word] += 1
