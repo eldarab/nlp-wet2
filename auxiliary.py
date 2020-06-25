@@ -26,3 +26,16 @@ def split(string, delimiters):
                 stack.insert(i + j, _substring)
 
     return stack
+
+
+def convert_tree_to_list(tree):
+    """
+    Converts a given tree to the format tree[modifier] = head.
+    :param tree: The tree to convert
+    :return: A list of the format tree[modifier] = head
+    """
+    tree = list(tree)
+    tree_list = []
+    for head, modifier in tree:
+        tree_list.append(int(head))
+    return tree_list
