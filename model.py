@@ -5,8 +5,8 @@ import numpy as np
 
 
 class KiperwasserDependencyParser(nn.Module):
-    def __init__(self, lstm_hidden_layers, word_vocab_size, word_embedding_size, pos_vocab_size,
-                 pos_embedding_size, encoder_hidden_size, mlp_hidden_dim, word_embeddings=None):
+    def __init__(self, lstm_hidden_layers, pos_vocab_size, pos_embedding_size, encoder_hidden_size, mlp_hidden_dim,
+                 word_vocab_size=None, word_embedding_size=None, word_embeddings=None):
         super(KiperwasserDependencyParser, self).__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if word_embeddings:

@@ -56,11 +56,11 @@ class ParserDataset(Dataset):
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
         # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
-        if word_embeddings:  # TODO allow for word embeddings to be created by nn.embedding
+        if word_embeddings:
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
             self.word_vector_dim = self.word_vectors.size(-1)
         else:
-            self.word_idx_mappings, self.idx_word_mappings = self.init_word_embeddings(self.datareader.word_dict)
+            self.word_idx_mappings, self.idx_word_mappings = self.init_vocab(self.datareader.word_dict)
             self.word_vectors = None
             self.word_vector_dim = None
 
@@ -79,9 +79,9 @@ class ParserDataset(Dataset):
         return word_embed_idx, pos_embed_idx, sentence_len, true_tree_heads
 
     @staticmethod
-    def init_word_embeddings(word_dict):
+    def init_vocab(word_dict):
         vocab = Vocab(Counter(word_dict), specials=SPECIAL_TOKENS)
-        return vocab.stoi, vocab.itos  # For some reason, the indexes are reversed
+        return vocab.stoi, vocab.itos
 
     @staticmethod
     def init_glove_word_embeddings(word_dict):
@@ -99,8 +99,6 @@ class ParserDataset(Dataset):
             # pos_idx_mappings[str(pos)] = int(i)
             pos_idx_mappings[str(pos)] = int(i + len(SPECIAL_TOKENS))
             idx_pos_mappings.append(str(pos))
-        print("idx_pos_mappings -", idx_pos_mappings)
-        print("pos_idx_mappings -", pos_idx_mappings)
         return pos_idx_mappings, idx_pos_mappings
 
     def get_pos_vocab(self):
@@ -193,9 +191,9 @@ def init_vocab_freq(list_of_paths):
     return word_dict, pos_dict
 
 
-def init_train_freq(list_of_train_paths):
+def init_train_freq(list_of_paths):
     word_dict = defaultdict(int)
-    for file_path in list_of_train_paths:
+    for file_path in list_of_paths:
         with open(file_path) as f:
             for line in f:
                 if line == '\n':
