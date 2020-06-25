@@ -56,7 +56,7 @@ class ParserDataset(Dataset):
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
         # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
-        if word_embeddings:
+        if word_embeddings:  # TODO receive vocab vectors name
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
             self.word_vector_dim = self.word_vectors.size(-1)
         else:

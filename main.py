@@ -37,7 +37,8 @@ alpha = 0.25               # alpha (for word dropout)
 
 epochs = 1
 lr = 0.01
-word_embeddings = None
+accumulate_grad_steps = 50  # effective batch_size
+word_embeddings = train_dataset.word_vectors
 
 # creating model
 model = KiperwasserDependencyParser(lstm_hidden_layers=lstm_hidden_layers,
@@ -56,7 +57,6 @@ if cuda_available:
 
 # optimizer
 optimizer = optim.Adam(model.parameters(), lr=lr)
-accumulate_grad_steps = 50  # effective batch_size
 
 
 def UAS(true_tree_arcs, pred_tree_arcs):
