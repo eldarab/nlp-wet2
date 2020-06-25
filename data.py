@@ -52,7 +52,6 @@ class ParserDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str,  # TODO why this gets word_dict, pos_dict
                  padding=False, word_embeddings=None, alpha=0.25, train_word_freq=None):
         super().__init__()
-        assert 'test' in subset or train_word_freq is not None
         self.alpha = alpha
         self.train_word_freq = train_word_freq
 
@@ -122,7 +121,7 @@ class ParserDataset(Dataset):
             true_tree_heads = []
             for modifier_idx, word, pos, head_idx in sentence:
                 # TODO reconsider enabling dropout on root
-                if self.subset == 'train' and self.dropout(word):
+                if self.subset == 'train' and self.train_word_freq is not None and self.dropout(word):
                     word = UNKNOWN_TOKEN
                     pos = UNKNOWN_TOKEN
 

@@ -41,6 +41,7 @@ class KiperwasserDependencyParser(nn.Module):
         return loss, predicted_tree
 
 
+#  TODO replace w/ a sequential
 class MLPScorer(nn.Module):
     def __init__(self, input_dim, hidden_dim):
         super(MLPScorer, self).__init__()
