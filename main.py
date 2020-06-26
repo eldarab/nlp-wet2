@@ -3,9 +3,11 @@ from train import train_model, draw_graphs
 data_dir = 'data/'
 train_filename = 'train.labeled'
 test_filename = 'test.labeled'
+train_300_filename = 'train_300.labeled'
+test_300_filename = 'test_300.labeled'
 comp_filename = 'comp.unlabeled'
 
-model_name = 'model555550'
+model_name = 'model100'
 mode, loss_list, train_acc_list, test_acc_list = train_model(model_name=model_name,
                                                              data_dir=data_dir,
                                                              filenames=[train_filename, test_filename],
@@ -16,10 +18,9 @@ mode, loss_list, train_acc_list, test_acc_list = train_model(model_name=model_na
                                                              encoder_hidden_size=125,
                                                              alpha=0.25,
                                                              word_embeddings=None,
-                                                             lowercase=True,  # changed
-                                                             epochs=10,
+                                                             epochs=2,
                                                              lr=0.01,
-                                                             batch_size=50,
+                                                             batch_size=2,
                                                              CUDA=True,
                                                              print_epochs=True,
                                                              save_dir='dumps/')

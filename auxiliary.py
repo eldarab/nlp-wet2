@@ -1,5 +1,7 @@
 from functools import reduce
 
+from torch import nn
+
 
 def add_or_append(dictionary, item, size=1):
     """

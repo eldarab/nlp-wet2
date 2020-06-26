@@ -23,7 +23,7 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
     train_acc_list, test_acc_list, loss_list = [], [], []
     for epoch in range(epochs):
         if epoch > 2:  # third epoch and beyond
-            if (abs(train_acc_list[-2] - train_acc_list[-1]) < BREAK_THRESHOLD) and\
+            if (abs(train_acc_list[-2] - train_acc_list[-1]) < BREAK_THRESHOLD) and \
                     (abs(train_acc_list[-3] - train_acc_list[-2]) < BREAK_THRESHOLD):
                 break
         train_acc = 0
@@ -91,13 +91,13 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     paths_list = [data_dir + filenames[0], data_dir + filenames[1]]
 
     # converting raw data to dedicated data objects
-    word_dict, pos_dict = init_vocab_freq(
-        paths_list)
+    word_dict, pos_dict = init_vocab_freq(paths_list)
     train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
-                                   padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha,
-                                   lowercase=lowercase)
+                                  padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha,
+                                  lowercase=lowercase)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
-    test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False, lowercase=lowercase)  # for evaluation
+    test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False,
+                                 lowercase=lowercase)  # for evaluation
     test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     # creating model
@@ -125,7 +125,8 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     optimizer = optim.Adam(model.parameters(), lr=lr)
     save_path = save_dir + model_name
     loss_list, train_acc_list, test_acc_list = train(epochs, batch_size, optimizer, train_dataset, train_dataloader,
-                                                     test_dataloader, model, save_path=save_path, print_epochs=print_epochs)
+                                                     test_dataloader, model, save_path=save_path,
+                                                     print_epochs=print_epochs)
 
     return model, loss_list, train_acc_list, test_acc_list
 

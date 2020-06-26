@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
-from model.model_1 import KiperwasserDependencyParser
+from model import KiperwasserDependencyParser
 
 
 def UAS(true_tree_arcs, pred_tree_arcs):
