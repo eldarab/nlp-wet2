@@ -12,9 +12,8 @@ import matplotlib.pyplot as plt
 
 BREAK_THRESHOLD = 0.01
 
-
-def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataset, model, save_path=None,
-          print_epochs=True):
+def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataloader: DataLoader,
+          model: KiperwasserDependencyParser, print_epochs=True):
     if print_epochs:
         print("Training Started")
     if save_path:
@@ -49,7 +48,7 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
         loss_list.append(float(epoch_loss))
         train_acc_list.append(float(train_acc))
         e_interval = len(train_dataset)
-        test_acc = evaluate(model, test_dataset)
+        test_acc = evaluate(model, test_dataloader)
         test_acc_list.append(test_acc)
         if print_epochs:
             print("Epoch: {}\tLoss: {}\tTrain Accuracy: {}\tTest Accuracy: {}".
@@ -67,7 +66,6 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
                 lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, epochs=10, lr=0.1,
                 batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
     """
-    
     :param word_embeddings:
     :param model_name:
     :param data_dir:
@@ -90,11 +88,13 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     paths_list = [data_dir + filenames[0], data_dir + filenames[1]]
 
     # converting raw data to dedicated data objects
-    word_dict, pos_dict = init_vocab_freq(paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
+    word_dict, pos_dict = init_vocab_freq(
+        paths_list)  # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
     train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
                                   padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
     test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False)  # for evaluation
+    test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     # creating model
     word_vocab_size = len(train_dataset.word_idx_mappings)  # includes words from test
@@ -121,9 +121,9 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     optimizer = optim.Adam(model.parameters(), lr=lr)
     save_path = save_dir + model_name
     loss_list, train_acc_list, test_acc_list = train(epochs, batch_size, optimizer, train_dataset, train_dataloader,
-                                                     test_dataset, model, save_path=save_path, print_epochs=print_epochs)
+                                                     test_dataloader, model, save_path=save_path, print_epochs=print_epochs)
 
-    return loss_list, train_acc_list, test_acc_list
+    return model, loss_list, train_acc_list, test_acc_list
 
 
 def draw_graphs(loss_list, train_acc_list, test_acc_list, save_path=None):

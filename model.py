@@ -24,19 +24,22 @@ class KiperwasserDependencyParser(nn.Module):
         self.decoder = decode_mst
         self.loss_function = NLLLoss
 
-    def forward(self, sentence):
+    def forward(self, sentence, calculate_loss=True):
         word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence  # TODO padding
 
-        word_idx_tensor = torch.squeeze(word_idx_tensor)
-        pos_idx_tensor = torch.squeeze(pos_idx_tensor)
+        word_idx_tensor = torch.squeeze(word_idx_tensor).to(self.device)
+        pos_idx_tensor = torch.squeeze(pos_idx_tensor).to(self.device)
 
-        words_embedded = self.word_embedding(word_idx_tensor.to(self.device))                       # [seq_length, word_embedding_size]
-        poss_embedded = self.pos_embedding(pos_idx_tensor.to(self.device))                          # [seq_length, pos_embedding_size]
+        words_embedded = self.word_embedding(word_idx_tensor)                                       # [seq_length, word_embedding_size]
+        poss_embedded = self.pos_embedding(pos_idx_tensor)                                          # [seq_length, pos_embedding_size]
         embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)     # [seq_length, batch_size, hidden_dim]
         lstm_out, _ = self.encoder(embeds)                                                          # [seq_length, batch_size, 2*hidden_dim]
         score_matrix = self.edge_scorer(lstm_out)                                                   # [seq_length, seq_length]
         predicted_tree, _ = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)
-        loss = self.loss_function(score_matrix, true_tree_heads)
+        if calculate_loss:
+            loss = self.loss_function(score_matrix, true_tree_heads)
+        else:
+            loss = None
 
         return loss, predicted_tree
 
