@@ -10,7 +10,7 @@ def UAS(true_tree_arcs, pred_tree_arcs):
     :param pred_tree_arcs: A list of tree arcs of the format pred_tree_arcs[modifier] = head
     :return: The percentage of correct arcs
     """
-    num_deps = len(true_tree_arcs)  # number of dependencies in the true tree
+    num_deps = len(true_tree_arcs) - 1  # number of dependencies in the true tree, minus fictive edge
     correct = 0
     assert true_tree_arcs[0] == -1 and pred_tree_arcs[0] == -1
     for true, pred in zip(true_tree_arcs, pred_tree_arcs):
@@ -38,3 +38,7 @@ def evaluate(model, dataset):
             pred_tree = list(pred_tree)
             accuracy_sum += UAS(true_tree, pred_tree)
     return accuracy_sum / len(dataset)
+
+
+def evaluate_model(model, data_path):
+    pass

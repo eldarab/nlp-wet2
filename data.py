@@ -158,7 +158,7 @@ class ParserDataset(Dataset):
                                                                      sentence_true_heads_list))}
 
     def dropout(self, word):
-        drop_prob = self.alpha/(self.alpha+self.train_word_freq[word])
+        drop_prob = self.alpha / (self.alpha+self.train_word_freq[word])
         return torch.bernoulli(torch.tensor(drop_prob))
 
 
