@@ -1,8 +1,7 @@
-from chu_liu_edmonds import decode_mst
+from shared.chu_liu_edmonds import decode_mst
 from torch import nn
 import torch
 from warnings import warn
-import numpy as np
 
 
 class KiperwasserDependencyParser(nn.Module):
@@ -27,8 +26,8 @@ class KiperwasserDependencyParser(nn.Module):
     def forward(self, sentence, calculate_loss=True):
         word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence
 
-        word_idx_tensor = torch.squeeze(word_idx_tensor).to(self.device)
-        pos_idx_tensor = torch.squeeze(pos_idx_tensor).to(self.device)
+        word_idx_tensor = torch.squeeze(word_idx_tensor.to(self.device))
+        pos_idx_tensor = torch.squeeze(pos_idx_tensor.to(self.device))
 
         words_embedded = self.word_embedding(word_idx_tensor)                                       # [seq_length, word_embedding_size]
         poss_embedded = self.pos_embedding(pos_idx_tensor)                                          # [seq_length, pos_embedding_size]

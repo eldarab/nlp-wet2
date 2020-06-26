@@ -1,11 +1,9 @@
-import pickle
-
 import torch
 from torch.utils.data.dataloader import DataLoader
 
-from eval import evaluate, predict_data
-from data_1 import ParserDataset, init_vocab_freq
-from train_1 import train_model, draw_graphs
+from shared.eval import predict_data
+from model_1.data_1 import ParserDataset, init_vocab_freq
+from model_1.train_1 import train_model, draw_graphs
 
 
 def hp_tuning(word_embedding_sizes, pos_embedding_sizes, mlp_hidden_dims,
@@ -29,14 +27,14 @@ def hp_tuning(word_embedding_sizes, pos_embedding_sizes, mlp_hidden_dims,
                                                                batch_size=50,
                                                                CUDA=True,
                                                                print_epochs=True,
-                                                               save_dir='./dumps/')
+                                                               save_dir='../dumps/')
         draw_graphs(loss_list, train_acc_list, test_acc_list, save_path='./dumps/model' + str(model_index) + '_graphs.pkl')
         if test_acc_list[-1] > best_acc:
             best_acc = test_acc_list[-1]
             best_model = model_index
 
 
-data_dir = './data/'
+data_dir = '../data/'
 train_filename = 'train.labeled'
 test_filename = 'test.labeled'
 comp_filename = 'comp.unlabeled'
@@ -44,7 +42,7 @@ train_300_filename = 'train_300.labeled'
 test_300_filename = 'test_300.labeled'
 
 
-with open('./dumps/model10/epoch5.eh', 'rb') as f:
+with open('../dumps/model10/epoch5.eh', 'rb') as f:
     model10 = torch.load(f)
 
 paths_list = [data_dir + train_filename, data_dir + test_filename]
@@ -70,7 +68,7 @@ loss_list, train_acc_list, test_acc_list = train_model(model_name=model_name,
                                                        batch_size=50,
                                                        CUDA=True,
                                                        print_epochs=True,
-                                                       save_dir='./dumps/')
+                                                       save_dir='../dumps/')
 
 draw_graphs(loss_list, train_acc_list, test_acc_list, save_path='./dumps/' + model_name + '_graphs.pkl')
 print(model_name, '\tbest train accuracy: ', max(train_acc_list), '\tbest test accuracy: ', max(test_acc_list))

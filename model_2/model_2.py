@@ -1,8 +1,7 @@
-from chu_liu_edmonds import decode_mst
+from shared.chu_liu_edmonds import decode_mst
 from torch import nn
 import torch
 from warnings import warn
-import numpy as np
 
 
 class KiperwasserDependencyParser(nn.Module):
@@ -69,7 +68,7 @@ class MLPScorer(nn.Module):
 def NLLLoss(score_matrix, true_tree_arcs):
     log_softmax = nn.LogSoftmax(dim=0)
     prob_score_matrix = log_softmax(score_matrix)
-    size_Y = len(true_tree_arcs)
+    size_Y = len(true_tree_arcs) - 1
     log_softmax_sum = 0
     for h, m in true_tree_arcs:
         if h == -1:  # the first arc is fictive

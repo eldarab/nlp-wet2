@@ -1,8 +1,7 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
-from auxiliary import convert_tree_to_list
-from data_1 import ParserDataset, init_vocab_freq
-from model_1 import KiperwasserDependencyParser
+from shared.auxiliary import convert_tree_to_list
+from model_1.model_1 import KiperwasserDependencyParser
 
 
 def UAS(true_tree_arcs, pred_tree_arcs):

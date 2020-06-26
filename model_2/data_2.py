@@ -1,9 +1,6 @@
-from auxiliary import split
-from auxiliary import add_or_append
 import torch
 from torchtext.vocab import Vocab
-from torch.utils.data.dataset import Dataset, TensorDataset
-from pathlib import Path
+from torch.utils.data.dataset import Dataset
 from collections import Counter, defaultdict
 
 # These are not relevant for our POS tagger but might be useful for HW2
