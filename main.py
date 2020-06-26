@@ -1,8 +1,12 @@
-from train import train_model, draw_graphs
+from train import train_model
 from data import ParserDataset, init_vocab_freq
 from eval import predict_data
+from torch.utils.data.dataloader import DataLoader
+from auxiliary import save_predictions
+
 
 data_dir = './data/'
+predictions_dir = 'predictions/'
 train_filename = 'train.labeled'
 test_filename = 'test.labeled'
 comp_filename = 'comp.unlabeled'
@@ -29,7 +33,9 @@ model, loss_list, train_acc_list, test_acc_list \
 
 # draw_graphs(loss_list, train_acc_list, test_acc_list)
 
-word_dict, pos_dict = init_vocab_freq([data_dir + comp_filename])
+word_dict, pos_dict = init_vocab_freq([data_dir+train_300_filename, data_dir+test_300_filename])
 comp_dataset = ParserDataset(word_dict, pos_dict, data_dir, comp_filename)
-predictions = predict_data(model, comp_dataset)
+comp_dataloader = DataLoader(comp_dataset)
+predictions = predict_data(model, comp_dataloader)
+save_predictions(predictions, data_dir+comp_filename, predictions_dir, 'temp')
 pass

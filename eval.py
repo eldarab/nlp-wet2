@@ -41,9 +41,11 @@ def evaluate(model, dataloader):
     return accuracy_sum / len(dataloader)
 
 
-def predict_data(model: KiperwasserDependencyParser, dataset: DataLoader):
+def predict_data(model: KiperwasserDependencyParser, dataset: DataLoader, limit=float('inf')):  # TODO remove limit
     with torch.no_grad():
         predictions = []
-        for sentence in dataset:
-            predictions.append(model(sentence, False)[1])
+        for num, sentence in enumerate(dataset):
+            if num == limit:
+                break
+            predictions.append(list(model(sentence, False)[1]))
     return predictions

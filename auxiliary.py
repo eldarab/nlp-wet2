@@ -1,3 +1,6 @@
+from functools import reduce
+
+
 def add_or_append(dictionary, item, size=1):
     """
     Add size to the key item if it is in the dictionary, otherwise appends the key to the dictionary
@@ -41,8 +44,27 @@ def convert_tree_to_list(tree):
     return tree_list
 
 
-def save_model(model):
-    pass
+def save_predictions(predictions: list, source_file_path: str, predictions_dir: str, predictions_file_name: str):
+    """"""
+    predictions_flat = [item for sublist in predictions for item in sublist]  # flatten list
+    predictions_filtered = filter(lambda x: x != -1, predictions_flat)  # remove -1 as we do not want to print them
+    with open(source_file_path, 'r') as source_file:
+        with open(predictions_dir + predictions_file_name, 'w') as prediction_file:
+            print_list = []
+            pred_iter = iter(predictions_filtered)
+            for line in source_file:
+                if line == '\n':
+                    # print_list.append(str())
+                    prediction_file.write('\n')
+                    continue
+                try:
+                    head_pred = next(pred_iter)
+                except StopIteration:
+                    print('The size of the predictions did not match the size of the source file')
+                    break
+                split_line = line.split('\t')
+                split_line[6] = str(head_pred)
+                prediction_file.write('\t'.join(split_line))
 
 # def generate_dicts(file_list):
 #     """
