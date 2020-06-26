@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
-from model_1.model_1 import KiperwasserDependencyParser
+from model.model_1 import KiperwasserDependencyParser
 
 
 def UAS(true_tree_arcs, pred_tree_arcs):
@@ -48,5 +48,3 @@ def predict_data(model: KiperwasserDependencyParser, dataset: DataLoader, limit=
                 break
             predictions.append(list(model(sentence, False)[1]))
     return predictions
-
-

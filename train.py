@@ -3,11 +3,11 @@ import os
 from torch import optim
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
-from data import ParserDataset2
+from data import ParserDataset
 from eval import UAS, evaluate
-from model_1.data_1 import init_vocab_freq, init_train_freq
+from data import init_vocab_freq, init_train_freq
 import numpy as np
-from model_1.model_1 import KiperwasserDependencyParser
+from model import KiperwasserDependencyParser
 import torch
 import matplotlib.pyplot as plt
 
@@ -64,9 +64,9 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
     return loss_list, train_acc_list, test_acc_list
 
 
-def train_model2(model_name, data_dir, filenames, word_embedding_size=100, pos_embedding_size=25, mlp_hidden_dim=100,
-                 lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, lowercase=False,
-                 epochs=10, lr=0.1, batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
+def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_embedding_size=25, mlp_hidden_dim=100,
+                lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, lowercase=False,
+                epochs=10, lr=0.1, batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
     """
     :param lowercase:
     :param word_embeddings:
@@ -93,11 +93,11 @@ def train_model2(model_name, data_dir, filenames, word_embedding_size=100, pos_e
     # converting raw data to dedicated data objects
     word_dict, pos_dict = init_vocab_freq(
         paths_list)
-    train_dataset = ParserDataset2(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
+    train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
                                    padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha,
                                    lowercase=lowercase)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
-    test_dataset = ParserDataset2(word_dict, pos_dict, data_dir, filenames[1], padding=False, lowercase=lowercase)  # for evaluation
+    test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False, lowercase=lowercase)  # for evaluation
     test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     # creating model

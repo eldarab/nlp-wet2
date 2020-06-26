@@ -15,7 +15,7 @@ ROOT_TOKEN_HEAD = -1
 # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
 
 
-class ParserDataReader2:
+class ParserDataReader:
     def __init__(self, file, word_dict, pos_dict, lowercase):
         self.file = file
         self.word_dict = word_dict
@@ -52,7 +52,7 @@ class ParserDataReader2:
         return len(self.sentences)
 
 
-class ParserDataset2(Dataset):
+class ParserDataset(Dataset):
     def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1, padding=False,
                  word_embeddings=None, alpha=0.25, train_word_freq=None, lowercase=False):
         super().__init__()
@@ -64,7 +64,7 @@ class ParserDataset2(Dataset):
         assert 'train' in subset or 'test' in subset or 'comp' in subset
         self.subset = subset  # One of the following: [train, test]
         self.file = dir_path + subset
-        self.datareader = ParserDataReader2(self.file, word_dict, pos_dict, self.lowercase)
+        self.datareader = ParserDataReader(self.file, word_dict, pos_dict, self.lowercase)
         self.vocab_size = len(self.datareader.word_dict)
         if word_embeddings:  # TODO receive vocab vectors name, when using pretrained
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
