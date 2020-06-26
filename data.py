@@ -62,12 +62,13 @@ class ParserDataset(Dataset):
         self.lowercase = lowercase
 
         assert 'train' in subset or 'test' in subset or 'comp' in subset
-        self.subset = subset  # One of the following: [train, test]
+        self.subset = subset  # One of the following: [train, test, comp]
         self.file = dir_path + subset
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict, self.lowercase)
         self.vocab_size = len(self.datareader.word_dict)
-        if word_embeddings:  # TODO receive vocab vectors name, when using pretrained
-            self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
+        if word_embeddings:
+            self.word_idx_mappings, self.idx_word_mappings, self.word_vectors =\
+                self.import_pre_trained_vocab(word_embeddings, self.datareader.word_dict)
             self.word_vector_dim = self.word_vectors.size(-1)
         else:
             self.word_idx_mappings, self.idx_word_mappings = self.init_vocab(self.datareader.word_dict)
@@ -92,10 +93,9 @@ class ParserDataset(Dataset):
         vocab = Vocab(Counter(word_dict), specials=SPECIAL_TOKENS, min_freq=self.min_freq)
         return vocab.stoi, vocab.itos
 
-    @staticmethod
-    def init_glove_word_embeddings(word_dict):
-        glove = Vocab(Counter(word_dict), vectors="glove.6B.300d", specials=SPECIAL_TOKENS)
-        return glove.stoi, glove.itos, glove.vectors  # For some reason, the indexes are reversed
+    def import_pre_trained_vocab(self, pre_trained_vectors, word_dict):
+        vocab = Vocab(Counter(word_dict), vectors=pre_trained_vectors, specials=SPECIAL_TOKENS, min_freq=self.min_freq)
+        return vocab.stoi, vocab.itos, vocab.vectors
 
     def get_word_embeddings(self):
         return self.word_idx_mappings, self.idx_word_mappings, self.word_vectors
