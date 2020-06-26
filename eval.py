@@ -23,14 +23,13 @@ def UAS(true_tree_arcs, pred_tree_arcs):
     return correct / num_deps
 
 
-def evaluate(model, dataset):
+def evaluate(model, dataloader):
     """
     Gets a trained model and a dataset to check the model's accuracy on
-    :param dataset: A dataset object with the data to evaluate the model on
+    :param dataloader: A DataLoader object with the data to evaluate the model on
     :param model: Preferably trained Kipperwasser model object
     :return: Accuracy of the model on the given dataset
     """
-    dataloader = DataLoader(dataset, shuffle=False)
     accuracy_sum = 0
     with torch.no_grad():
         for batch_idx, input_data in enumerate(dataloader):
@@ -39,10 +38,10 @@ def evaluate(model, dataset):
             true_tree = convert_tree_to_list(true_tree)
             pred_tree = list(pred_tree)
             accuracy_sum += UAS(true_tree, pred_tree)
-    return accuracy_sum / len(dataset)
+    return accuracy_sum / len(dataloader)
 
 
-def predict_data(model: KiperwasserDependencyParser, dataset: ParserDataset):
+def predict_data(model: KiperwasserDependencyParser, dataset: DataLoader):
     with torch.no_grad():
         predictions = []
         for sentence in dataset:

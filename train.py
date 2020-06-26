@@ -9,7 +9,7 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataset,
+def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_dataloader: DataLoader,
           model: KiperwasserDependencyParser, print_epochs=True):
     if print_epochs:
         print("Training Started")
@@ -40,7 +40,7 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
         loss_list.append(float(epoch_loss))
         train_acc_list.append(float(train_acc))
         e_interval = len(train_dataset)
-        test_acc = evaluate(model, test_dataset)
+        test_acc = evaluate(model, test_dataloader)
         test_acc_list.append(test_acc)
         if print_epochs:
             print("Epoch: {}\tLoss: {}\tTrain Accuracy: {}\tTest Accuracy: {}".
@@ -84,6 +84,7 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
                                   padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
     test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False)  # for evaluation
+    test_dataloader = DataLoader(test_dataset, shuffle=False)
 
     # creating model
     word_vocab_size = len(train_dataset.word_idx_mappings)  # includes words from test
@@ -109,7 +110,7 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
     loss_list, train_acc_list, test_acc_list = train(epochs, batch_size, optimizer, train_dataset, train_dataloader,
-                                                     test_dataset, model, print_epochs)
+                                                     test_dataloader, model, print_epochs)
 
     if save_dir:
         torch.save(model, save_dir + model_name + '.eh')
