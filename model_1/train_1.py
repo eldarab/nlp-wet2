@@ -2,8 +2,8 @@ import pickle
 import os
 from torch import optim
 from torch.utils.data.dataloader import DataLoader
-from shared.auxiliary import convert_tree_to_list
-from shared.eval import UAS, evaluate
+from auxiliary import convert_tree_to_list
+from eval import UAS, evaluate
 from model_1.data_1 import init_vocab_freq, ParserDataset, init_train_freq
 import numpy as np
 from model_1.model_1 import KiperwasserDependencyParser

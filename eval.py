@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
-from shared.auxiliary import convert_tree_to_list
+from auxiliary import convert_tree_to_list
 from model_1.model_1 import KiperwasserDependencyParser
 
 

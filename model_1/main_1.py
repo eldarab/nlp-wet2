@@ -1,37 +1,9 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
 
-from shared.eval import predict_data
+from eval import predict_data
 from model_1.data_1 import ParserDataset, init_vocab_freq
 from model_1.train_1 import train_model, draw_graphs
-
-
-def hp_tuning(word_embedding_sizes, pos_embedding_sizes, mlp_hidden_dims,
-                lstm_hidden_layerss, alphas, lrs):
-    model_index = 10
-    best_acc = 0
-    best_model = -1  # meaningless
-    for lstm_hidden_layers in lstm_hidden_layerss:
-        loss_list, train_acc_list, test_acc_list = train_model(model_name='model' + str(model_index),
-                                                               data_dir=data_dir,
-                                                               filenames=[train_filename, test_filename],
-                                                               word_embedding_size=word_embedding_sizes[0],
-                                                               pos_embedding_size=pos_embedding_sizes[0],
-                                                               mlp_hidden_dim=mlp_hidden_dims[0],
-                                                               lstm_hidden_layers=lstm_hidden_layers,
-                                                               encoder_hidden_size=word_embedding_sizes[0] + pos_embedding_sizes[0],
-                                                               alpha=alphas[0],
-                                                               word_embeddings=None,
-                                                               epochs=4,
-                                                               lr=lrs[0],
-                                                               batch_size=50,
-                                                               CUDA=True,
-                                                               print_epochs=True,
-                                                               save_dir='../dumps/')
-        draw_graphs(loss_list, train_acc_list, test_acc_list, save_path='./dumps/model' + str(model_index) + '_graphs.pkl')
-        if test_acc_list[-1] > best_acc:
-            best_acc = test_acc_list[-1]
-            best_model = model_index
 
 
 data_dir = '../data/'
@@ -52,7 +24,7 @@ comp_dataloader = DataLoader(comp_dataset)
 predictions = predict_data(model10, comp_dataloader)
 
 
-model_name = 'model10'
+model_name = 'model100'
 loss_list, train_acc_list, test_acc_list = train_model(model_name=model_name,
                                                        data_dir=data_dir,
                                                        filenames=[train_filename, test_filename],

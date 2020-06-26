@@ -84,6 +84,19 @@ def save_predictions(predictions: list, source_file_path: str, predictions_dir: 
                 split_line[6] = str(head_pred)
                 prediction_file.write('\t'.join(split_line))
 
+
+def NLLLoss(score_matrix, true_tree_arcs):
+    log_softmax = nn.LogSoftmax(dim=0)
+    prob_score_matrix = log_softmax(score_matrix)
+    size_Y = len(true_tree_arcs) - 1
+    log_softmax_sum = 0
+    for h, m in true_tree_arcs:
+        if h == -1:  # the first arc is fictive
+            continue
+        log_softmax_sum += prob_score_matrix[h, m]
+    return (-1 / size_Y) * log_softmax_sum
+
+
 # def generate_dicts(file_list):
 #     """
 #     Extracts words and tags vocabularies.

@@ -1,4 +1,5 @@
-from shared.chu_liu_edmonds import decode_mst
+from auxiliary import NLLLoss
+from chu_liu_edmonds import decode_mst
 from torch import nn
 import torch
 from warnings import warn
@@ -63,15 +64,3 @@ class MLPScorer(nn.Module):
                 x = self.W2(x)
                 score_matrix[i][j] = x
         return score_matrix
-
-
-def NLLLoss(score_matrix, true_tree_arcs):
-    log_softmax = nn.LogSoftmax(dim=0)
-    prob_score_matrix = log_softmax(score_matrix)
-    size_Y = len(true_tree_arcs) - 1
-    log_softmax_sum = 0
-    for h, m in true_tree_arcs:
-        if h == -1:  # the first arc is fictive
-            continue
-        log_softmax_sum += prob_score_matrix[h, m]
-    return (-1 / size_Y) * log_softmax_sum
