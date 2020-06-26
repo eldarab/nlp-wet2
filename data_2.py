@@ -15,15 +15,15 @@ SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # did not add ROOT_TOKEN to here be
 
 ROOT_TOKEN_COUNTER = 0
 ROOT_TOKEN_HEAD = -1
-# TODO consider lowering all words
 # TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
 
 
-class ParserDataReader:
-    def __init__(self, file, word_dict, pos_dict):
+class ParserDataReader2:
+    def __init__(self, file, word_dict, pos_dict, lowercase):
         self.file = file
         self.word_dict = word_dict
         self.pos_dict = pos_dict
+        self.lowercase = lowercase
         self.sentences = []
         self.__readData__()
 
@@ -36,7 +36,10 @@ class ParserDataReader:
                     self.sentences.append(cur_sentence)
                     cur_sentence = [(ROOT_TOKEN_COUNTER, ROOT_TOKEN, ROOT_TOKEN, ROOT_TOKEN_HEAD)]
                     continue
-                line_splitted = line.split('\t')
+                if self.lowercase:
+                    line_splitted = line.lower().split('\t')
+                else:
+                    line_splitted = line.split('\t')
                 assert len(line_splitted) >= 6
                 token_counter = int(line_splitted[0])
                 token = line_splitted[1]
@@ -52,18 +55,19 @@ class ParserDataReader:
         return len(self.sentences)
 
 
-class ParserDataset(Dataset):
-    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1,
-                 padding=False, word_embeddings=None, alpha=0.25, train_word_freq=None):
+class ParserDataset2(Dataset):
+    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1, padding=False,
+                 word_embeddings=None, alpha=0.25, train_word_freq=None, lowercase=False):
         super().__init__()
         self.alpha = alpha
         self.train_word_freq = train_word_freq
         self.min_freq = min_freq
+        self.lowercase = lowercase
 
         assert 'train' in subset or 'test' in subset or 'comp' in subset
         self.subset = subset  # One of the following: [train, test]
         self.file = dir_path + subset
-        self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
+        self.datareader = ParserDataReader2(self.file, word_dict, pos_dict, self.lowercase)
         self.vocab_size = len(self.datareader.word_dict)
         if word_embeddings:  # TODO receive vocab vectors name, when using pretrained
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings

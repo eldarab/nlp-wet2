@@ -110,7 +110,7 @@ class ParserDataset(Dataset):
     def get_pos_vocab(self):
         return self.pos_idx_mappings, self.idx_pos_mappings
 
-    def convert_sentences_to_dataset(self, padding):
+    def convert_sentences_to_dataset(self):
         sentence_word_idx_list = list()
         sentence_pos_idx_list = list()
         sentence_len_list = list()
@@ -137,20 +137,10 @@ class ParserDataset(Dataset):
 
                 true_tree_heads.append((head_idx, modifier_idx))
             sentence_len = len(words_idx_list)
-            # if padding:
-            #     while len(words_idx_list) < self.max_seq_len:
-            #         words_idx_list.append(self.word_idx_mappings.get(PAD_TOKEN))
-            #         pos_idx_list.append(self.pos_idx_mappings.get(PAD_TOKEN))
             sentence_word_idx_list.append(torch.tensor(words_idx_list, dtype=torch.long, requires_grad=False))
             sentence_pos_idx_list.append(torch.tensor(pos_idx_list, dtype=torch.long, requires_grad=False))
             sentence_len_list.append(sentence_len)
             sentence_true_heads_list.append(true_tree_heads)
-
-        # if padding:
-        #     all_sentence_word_idx = torch.tensor(sentence_word_idx_list, dtype=torch.long)
-        #     all_sentence_pos_idx = torch.tensor(sentence_pos_idx_list, dtype=torch.long)
-        #     all_sentence_len = torch.tensor(sentence_len_list, dtype=torch.long, requires_grad=False)
-        #     return TensorDataset(all_sentence_word_idx, all_sentence_pos_idx, all_sentence_len)
 
         return {i: sample_tuple for i, sample_tuple in enumerate(zip(sentence_word_idx_list,
                                                                      sentence_pos_idx_list,
