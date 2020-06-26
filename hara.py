@@ -1,3 +1,3 @@
-from model import KiperwasserDependencyParser
+from model_1 import KiperwasserDependencyParser
 
 

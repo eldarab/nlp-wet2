@@ -15,7 +15,6 @@ SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # did not add ROOT_TOKEN to here be
 
 ROOT_TOKEN_COUNTER = 0
 ROOT_TOKEN_HEAD = -1
-# TODO consider lowering all words
 
 
 class ParserDataReader:
@@ -52,7 +51,7 @@ class ParserDataReader:
 
 
 class ParserDataset(Dataset):
-    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1,  # TODO why this gets word_dict, pos_dict
+    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1,
                  padding=False, word_embeddings=None, alpha=0.25, train_word_freq=None):
         super().__init__()
         self.alpha = alpha
@@ -64,8 +63,7 @@ class ParserDataset(Dataset):
         self.file = dir_path + subset
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict)
         self.vocab_size = len(self.datareader.word_dict)
-        # self.pos_size = len(self.datareader.pos_dict)  # TODO do we need this?
-        if word_embeddings:  # TODO receive vocab vectors name
+        if word_embeddings:
             self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = word_embeddings
             self.word_vector_dim = self.word_vectors.size(-1)
         else:
@@ -112,7 +110,7 @@ class ParserDataset(Dataset):
     def get_pos_vocab(self):
         return self.pos_idx_mappings, self.idx_pos_mappings
 
-    def convert_sentences_to_dataset(self, padding):  # TODO still not using padding
+    def convert_sentences_to_dataset(self, padding):
         sentence_word_idx_list = list()
         sentence_pos_idx_list = list()
         sentence_len_list = list()
@@ -123,17 +121,16 @@ class ParserDataset(Dataset):
             pos_idx_list = []
             true_tree_heads = []
             for modifier_idx, word, pos, head_idx in sentence:
-                # TODO reconsider enabling dropout on root
                 if self.subset == 'train' and self.train_word_freq is not None and self.dropout(word):
                     word = UNKNOWN_TOKEN
                     pos = UNKNOWN_TOKEN
 
-                if word not in self.word_idx_mappings:  # TODO what happens if word has no mapping?
+                if word not in self.word_idx_mappings:
                     words_idx_list.append(self.word_idx_mappings.get(UNKNOWN_TOKEN))
                 else:
                     words_idx_list.append(self.word_idx_mappings.get(word))
 
-                if pos not in self.pos_idx_mappings:  # TODO what happens if POS has no mapping?
+                if pos not in self.pos_idx_mappings:
                     pos_idx_list.append(self.pos_idx_mappings.get(UNKNOWN_TOKEN))
                 else:
                     pos_idx_list.append(self.pos_idx_mappings.get(pos))

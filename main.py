@@ -1,3 +1,10 @@
+import pickle
+
+import torch
+from torch.utils.data.dataloader import DataLoader
+
+from eval import evaluate, predict_data
+from data_1 import ParserDataset, init_vocab_freq
 from train import train_model, draw_graphs
 
 
@@ -35,6 +42,17 @@ test_filename = 'test.labeled'
 comp_filename = 'comp.unlabeled'
 train_300_filename = 'train_300.labeled'
 test_300_filename = 'test_300.labeled'
+
+
+with open('./dumps/model10/epoch5.eh', 'rb') as f:
+    model10 = torch.load(f)
+
+paths_list = [data_dir + train_filename, data_dir + test_filename]
+word_dict, pos_dict = init_vocab_freq(paths_list)
+comp_dataset = ParserDataset(word_dict, pos_dict, data_dir, comp_filename, padding=False)
+comp_dataloader = DataLoader(comp_dataset)
+predictions = predict_data(model10, comp_dataloader)
+
 
 model_name = 'model10'
 loss_list, train_acc_list, test_acc_list = train_model(model_name=model_name,
