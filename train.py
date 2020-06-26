@@ -54,10 +54,10 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
         test_acc_list.append(test_acc)
         if print_epochs:
             print("Epoch: {}\tLoss: {}\tTrain Accuracy: {}\tTest Accuracy: {}".
-                  format(epoch + 1,
-                         np.mean(loss_list[-e_interval:]),
-                         np.mean(train_acc_list[-e_interval:]),
-                         test_acc))
+                  format(epoch + 1, round(epoch_loss, 4), round(train_acc, 4), round(test_acc, 4)))
+                         # np.mean(loss_list[-e_interval:]),
+                         # np.mean(train_acc_list[-e_interval:]),
+                         # test_acc))
         if save_path:
             torch.save(model, save_path + '/epoch' + str(epoch) + '.eh')
 

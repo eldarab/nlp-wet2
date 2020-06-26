@@ -1,5 +1,3 @@
-from functools import reduce
-
 from torch import nn
 
 
@@ -13,6 +11,7 @@ def add_or_append(dictionary, item, size=1):
         dictionary[item] += size
 
 
+# TODO deprecated? Delete it if it is so
 def split(string, delimiters):
     """
         Split strings according to delimiters

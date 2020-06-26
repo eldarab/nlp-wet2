@@ -7,10 +7,10 @@ train_300_filename = 'train_300.labeled'
 test_300_filename = 'test_300.labeled'
 comp_filename = 'comp.unlabeled'
 
-model_name = 'model100'
+model_name = 'testing'
 mode, loss_list, train_acc_list, test_acc_list = train_model(model_name=model_name,
                                                              data_dir=data_dir,
-                                                             filenames=[train_filename, test_filename],
+                                                             filenames=[train_300_filename, test_300_filename],
                                                              word_embedding_size=100,
                                                              pos_embedding_size=25,
                                                              mlp_hidden_dim=100,
@@ -18,7 +18,7 @@ mode, loss_list, train_acc_list, test_acc_list = train_model(model_name=model_na
                                                              encoder_hidden_size=125,
                                                              alpha=0.25,
                                                              word_embeddings=None,
-                                                             epochs=2,
+                                                             epochs=10,
                                                              lr=0.01,
                                                              batch_size=2,
                                                              CUDA=True,
@@ -26,5 +26,7 @@ mode, loss_list, train_acc_list, test_acc_list = train_model(model_name=model_na
                                                              save_dir='dumps/')
 
 draw_graphs(loss_list, train_acc_list, test_acc_list, save_path='./dumps/' + model_name + '_graphs.pkl')
-print(model_name, '\tbest train accuracy: ', max(train_acc_list), '\tbest test accuracy: ', max(test_acc_list))
+print(model_name,
+      '\tbest train accuracy: ', round(max(train_acc_list), 4),
+      '\tbest test accuracy: ', round(max(test_acc_list), 4))
 
