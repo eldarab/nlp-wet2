@@ -61,7 +61,7 @@ class ParserDataset(Dataset):
         self.min_freq = min_freq
         self.lowercase = lowercase
 
-        assert 'train' in subset or 'test' in subset or 'comp' in subset
+        assert 'train' in subset or 'test' in subset or 'comp' in subset or 'combined' in subset
         self.subset = subset  # One of the following: [train, test, comp]
         self.file = dir_path + subset
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict, self.lowercase)
