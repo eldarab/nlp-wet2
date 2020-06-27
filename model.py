@@ -17,7 +17,7 @@ class KiperwasserDependencyParser(nn.Module):
         if (word_vocab_size is None or word_embedding_size is None) and word_embeddings is None:
             raise Exception('No word embeddings have been given to the model')
 
-        if word_embeddings:
+        if word_embeddings is not None:
             self.pre_trained_word_embedding = nn.Embedding.from_pretrained(word_embeddings, freeze=False)
         else:
             self.pre_trained_word_embedding = None
@@ -63,8 +63,8 @@ class KiperwasserDependencyParser(nn.Module):
     def embed_words(self, words_idx_tensor):
         word_embedding = None
         if self.pre_trained_word_embedding is not None and self.word_embedding is not None:
-            word_embedding = torch.cat(self.pre_trained_word_embedding(words_idx_tensor),
-                                       self.word_embedding(words_idx_tensor))
+            word_embedding = torch.cat((self.pre_trained_word_embedding(words_idx_tensor),
+                                       self.word_embedding(words_idx_tensor)), dim=1)
         elif self.pre_trained_word_embedding is not None:
             word_embedding = self.pre_trained_word_embedding(words_idx_tensor)
         elif self.word_embedding is not None:

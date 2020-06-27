@@ -91,10 +91,10 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     paths_list = [data_dir + filenames[0], data_dir + filenames[1]]
 
     # converting raw data to dedicated data objects
-    word_dict, pos_dict = init_vocab_freq(paths_list)
+    word_dict, pos_dict = init_vocab_freq(paths_list, lowercase=lowercase)
     train_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[0], word_embeddings=word_embeddings,
-                                  padding=False, train_word_freq=init_train_freq(paths_list), alpha=alpha,
-                                  lowercase=lowercase)
+                                  padding=False, train_word_freq=init_train_freq(paths_list, lowercase=lowercase),
+                                  alpha=alpha, lowercase=lowercase)
     train_dataloader = DataLoader(train_dataset, shuffle=True)  # batch size is 1 by default
     test_dataset = ParserDataset(word_dict, pos_dict, data_dir, filenames[1], padding=False,
                                  lowercase=lowercase)  # for evaluation

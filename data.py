@@ -165,7 +165,7 @@ class ParserDataset(Dataset):
         return torch.bernoulli(torch.tensor(drop_prob))
 
 
-def init_vocab_freq(list_of_paths):
+def init_vocab_freq(list_of_paths, lowercase=False):
     word_dict = defaultdict(int)
     pos_dict = defaultdict(int)
     for file_path in list_of_paths:
@@ -175,7 +175,10 @@ def init_vocab_freq(list_of_paths):
                     word_dict[ROOT_TOKEN] += 1
                     pos_dict[ROOT_TOKEN] += 1
                     continue
-                line_splitted = line.split('\t')
+                if lowercase:
+                    line_splitted = line.lower().split('\t')
+                else:
+                    line_splitted = line.split('\t')
                 assert len(line_splitted) >= 6
                 word = line_splitted[1]
                 pos = line_splitted[3]
@@ -184,7 +187,7 @@ def init_vocab_freq(list_of_paths):
     return word_dict, pos_dict
 
 
-def init_train_freq(list_of_paths):
+def init_train_freq(list_of_paths, lowercase=False):
     word_dict = defaultdict(int)
     for file_path in list_of_paths:
         with open(file_path) as f:
@@ -192,6 +195,9 @@ def init_train_freq(list_of_paths):
                 if line == '\n':
                     word_dict[ROOT_TOKEN] += 1
                     continue
-                word = line.split('\t')[1]
+                if lowercase:
+                    word = line.lower().split('\t')[1]
+                else:
+                    word = line.split('\t')[1]
                 word_dict[word] += 1
     return word_dict
