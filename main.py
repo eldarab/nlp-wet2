@@ -1,3 +1,30 @@
+
+
+# ▓█████  ██▓    ▓█████▄  ▄▄▄       ██▀███             ▄▄▄       ▄▄▄▄    ██▀███   ▄▄▄       ██░ ██  ▄▄▄       ███▄ ▄███▓
+# ▓█   ▀ ▓██▒    ▒██▀ ██▌▒████▄    ▓██ ▒ ██▒          ▒████▄    ▓█████▄ ▓██ ▒ ██▒▒████▄    ▓██░ ██▒▒████▄    ▓██▒▀█▀ ██▒
+# ▒███   ▒██░    ░██   █▌▒██  ▀█▄  ▓██ ░▄█ ▒          ▒██  ▀█▄  ▒██▒ ▄██▓██ ░▄█ ▒▒██  ▀█▄  ▒██▀▀██░▒██  ▀█▄  ▓██    ▓██░
+# ▒▓█  ▄ ▒██░    ░▓█▄   ▌░██▄▄▄▄██ ▒██▀▀█▄            ░██▄▄▄▄██ ▒██░█▀  ▒██▀▀█▄  ░██▄▄▄▄██ ░▓█ ░██ ░██▄▄▄▄██ ▒██    ▒██
+# ░▒████▒░██████▒░▒████▓  ▓█   ▓██▒░██▓ ▒██▒           ▓█   ▓██▒░▓█  ▀█▓░██▓ ▒██▒ ▓█   ▓██▒░▓█▒░██▓ ▓█   ▓██▒▒██▒   ░██▒
+# ░░ ▒░ ░░ ▒░▓  ░ ▒▒▓  ▒  ▒▒   ▓▒█░░ ▒▓ ░▒▓░           ▒▒   ▓▒█░░▒▓███▀▒░ ▒▓ ░▒▓░ ▒▒   ▓▒█░ ▒ ░░▒░▒ ▒▒   ▓▒█░░ ▒░   ░  ░
+#  ░ ░  ░░ ░ ▒  ░ ░ ▒  ▒   ▒   ▒▒ ░  ░▒ ░ ▒░            ▒   ▒▒ ░▒░▒   ░   ░▒ ░ ▒░  ▒   ▒▒ ░ ▒ ░▒░ ░  ▒   ▒▒ ░░  ░      ░
+#    ░     ░ ░    ░ ░  ░   ░   ▒     ░░   ░             ░   ▒    ░    ░   ░░   ░   ░   ▒    ░  ░░ ░  ░   ▒   ░      ░
+#    ░  ░    ░  ░   ░          ░  ░   ░                     ░  ░ ░         ░           ░  ░ ░  ░  ░      ░  ░       ░
+#                 ░                                                   ░
+
+
+#  ██░ ██  ▄▄▄      ▓█████▄  ▄▄▄       ██▀███              ██████  ██▓ ███▄    █  ▄▄▄       ██▓
+# ▓██░ ██▒▒████▄    ▒██▀ ██▌▒████▄    ▓██ ▒ ██▒          ▒██    ▒ ▓██▒ ██ ▀█   █ ▒████▄    ▓██▒
+# ▒██▀▀██░▒██  ▀█▄  ░██   █▌▒██  ▀█▄  ▓██ ░▄█ ▒          ░ ▓██▄   ▒██▒▓██  ▀█ ██▒▒██  ▀█▄  ▒██▒
+# ░▓█ ░██ ░██▄▄▄▄██ ░▓█▄   ▌░██▄▄▄▄██ ▒██▀▀█▄              ▒   ██▒░██░▓██▒  ▐▌██▒░██▄▄▄▄██ ░██░
+# ░▓█▒░██▓ ▓█   ▓██▒░▒████▓  ▓█   ▓██▒░██▓ ▒██▒          ▒██████▒▒░██░▒██░   ▓██░ ▓█   ▓██▒░██░
+#  ▒ ░░▒░▒ ▒▒   ▓▒█░ ▒▒▓  ▒  ▒▒   ▓▒█░░ ▒▓ ░▒▓░          ▒ ▒▓▒ ▒ ░░▓  ░ ▒░   ▒ ▒  ▒▒   ▓▒█░░▓
+#  ▒ ░▒░ ░  ▒   ▒▒ ░ ░ ▒  ▒   ▒   ▒▒ ░  ░▒ ░ ▒░          ░ ░▒  ░ ░ ▒ ░░ ░░   ░ ▒░  ▒   ▒▒ ░ ▒ ░
+#  ░  ░░ ░  ░   ▒    ░ ░  ░   ░   ▒     ░░   ░           ░  ░  ░   ▒ ░   ░   ░ ░   ░   ▒    ▒ ░
+#  ░  ░  ░      ░  ░   ░          ░  ░   ░                     ░   ░           ░       ░  ░ ░
+#                    ░
+
+
+import pickle
 import torch
 from torch import nn
 from torch.utils.data.dataloader import DataLoader
@@ -13,16 +40,17 @@ train_200_filename = 'train_200.labeled'
 test_200_filename = 'test_200.labeled'
 comp_filename = 'comp.unlabeled'
 
-paths_list = [data_dir + train_filename, data_dir + test_filename]
-word_dict, pos_dict = init_vocab_freq(paths_list, lowercase=True)
-test_dataset = ParserDataset(word_dict, pos_dict, data_dir, test_filename, lowercase=True)
-test_dataloader = DataLoader(test_dataset, shuffle=False)
-with open('dumps/model-glove12/epoch6.eh', 'rb') as f:
-    loaded_model = torch.load(f)
-loaded_model.to('cuda')
 
-print('accuracy old: ', evaluate_old(loaded_model, test_dataloader))
-print('accuracy new: ', evaluate(loaded_model, test_dataloader))
+# paths_list = [data_dir + train_filename, data_dir + test_filename]
+# word_dict, pos_dict = init_vocab_freq(paths_list, lowercase=True)
+# test_dataset = ParserDataset(word_dict, pos_dict, data_dir, test_filename, lowercase=True)
+# test_dataloader = DataLoader(test_dataset, shuffle=False)
+# with open('dumps/model-glove12/epoch6.eh', 'rb') as f:
+#     loaded_model = torch.load(f)
+# loaded_model.to('cuda')
+#
+# print('accuracy old: ', evaluate_old(loaded_model, test_dataloader))
+# print('accuracy new: ', evaluate(loaded_model, test_dataloader))
 
 # model_name = 'base-model'
 # _, loss_list, train_acc_list, test_acc_list = train_model(model_name=model_name,
@@ -44,6 +72,8 @@ print('accuracy new: ', evaluate(loaded_model, test_dataloader))
 #                                                           print_epochs=True,
 #                                                           save_dir='dumps/')
 #
-# draw_graphs(loss_list, train_acc_list, test_acc_list, save_path='./dumps/' + model_name + '_graphs.pkl')
+with open('dumps/model-glove12_graphs.pkl', 'rb') as f:
+    loss_list, train_acc_list, test_acc_list = pickle.load(f)
+draw_graphs(loss_list, train_acc_list, test_acc_list)
 # print('finished training ', model_name)
 
