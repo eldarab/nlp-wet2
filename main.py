@@ -31,6 +31,7 @@ from torch.utils.data.dataloader import DataLoader
 from eval import evaluate, evaluate_old
 from data import init_vocab_freq, ParserDataset
 from train import train_model, draw_graphs
+from matplotlib import pyplot as plt
 
 data_dir = 'data/'
 train_filename = 'train.labeled'
@@ -39,6 +40,26 @@ combined_filename = 'combined.labeled'
 train_200_filename = 'train_200.labeled'
 test_200_filename = 'test_200.labeled'
 comp_filename = 'comp.unlabeled'
+
+
+train_acc_list = [0.8496, 0.8733, 0.8711, 0.8725]
+test_acc_list = [0.6743, 0.8956, 0.936, 0.9551]
+loss_list = [0.597, 0.339, 0.2061, 0.1414]
+
+plt.plot(train_acc_list, c="red", label="Train accuracy")
+plt.plot(test_acc_list, c="green", label="Test accuracy")
+plt.title("Train and test accuracies (UAS) vs. epochs")
+plt.xlabel("Epochs")
+plt.ylabel("accuracy %")
+plt.legend()
+plt.show()
+
+plt.plot(loss_list, c="blue", label="Loss")
+plt.title("Loss vs. epochs")
+plt.xlabel("Epochs")
+plt.ylabel("Value")
+plt.legend()
+plt.show()
 
 
 # paths_list = [data_dir + train_filename, data_dir + test_filename]

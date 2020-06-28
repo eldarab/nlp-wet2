@@ -17,12 +17,12 @@ word_dict, pos_dict = init_vocab_freq(paths_list, lowercase=False)
 comp_dataset = ParserDataset(word_dict, pos_dict, data_dir, comp_filename, lowercase=False)
 comp_dataloader = DataLoader(comp_dataset, shuffle=False)
 
-with open('trained models/base_model', 'rb') as f:
-    advanced_model = torch.load(f)
+with open('trained models/base-model.eh', 'rb') as f:
+    base_model = torch.load(f)
 if torch.cuda.is_available():
-    advanced_model.to('cuda')
-predictions = predict_data(advanced_model, comp_dataloader)
-save_predictions(predictions, 'comp.unlabeled', '', 'comp_m1_318792827.labeled')
+    base_model.to('cuda')
+predictions = predict_data(base_model, comp_dataloader)
+save_predictions(predictions, data_dir + comp_filename, '', 'comp_m1_318792827.labeled')
 
 
 # Generate a tagged comp file using the advanced model
@@ -31,9 +31,9 @@ word_dict, pos_dict = init_vocab_freq(paths_list, lowercase=True)
 comp_dataset = ParserDataset(word_dict, pos_dict, data_dir, comp_filename, lowercase=True)
 comp_dataloader = DataLoader(comp_dataset, shuffle=False)
 
-with open('trained models/advanced_model.eh', 'rb') as f:
+with open('trained models/advanced-model.eh', 'rb') as f:
     advanced_model = torch.load(f)
 if torch.cuda.is_available():
     advanced_model.to('cuda')
 predictions = predict_data(advanced_model, comp_dataloader)
-save_predictions(predictions, data_dir+comp_filename, '', 'comp_m2_318792827.labeled')
+save_predictions(predictions, data_dir + comp_filename, '', 'comp_m2_318792827.labeled')

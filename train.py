@@ -135,7 +135,7 @@ def draw_graphs(loss_list, train_acc_list, test_acc_list, save_path=None):
     plt.show()
 
     plt.plot(loss_list, c="blue", label="Loss")
-    plt.title("Train and test accuracies vs. epochs")
+    plt.title("Loss vs. epochs")
     plt.xlabel("Epochs")
     plt.ylabel("Value")
     plt.legend()
