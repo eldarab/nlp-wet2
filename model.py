@@ -69,12 +69,12 @@ class KiperwasserDependencyParser(nn.Module):
         word_idx_tensor = torch.squeeze(word_idx_tensor.to(self.device))
         pos_idx_tensor = torch.squeeze(pos_idx_tensor.to(self.device))
 
-        words_embedded = self.embed_words(word_idx_tensor)                      # [seq_length, word_embedding_size]
-        poss_embedded = self.pos_embedding(pos_idx_tensor)                      # [seq_length, pos_embedding_size]
+        words_embedded = self.embed_words(word_idx_tensor)      # [seq_length, word_embedding_size]
+        poss_embedded = self.pos_embedding(pos_idx_tensor)      # [seq_length, pos_embedding_size]
         embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)
-                                                                                # [seq_length, batch_size, hidden_dim]
-        lstm_out, _ = self.encoder(embeds)                                      # [seq_length, batch_size, 2*hidden_dim]
-        score_matrix = self.generate_score_matrix(lstm_out)                     # [seq_length, seq_length]
+                                                                # [seq_length, batch_size, hidden_dim]
+        lstm_out, _ = self.encoder(embeds)                      # [seq_length, batch_size, 2*hidden_dim]
+        score_matrix = self.generate_score_matrix(lstm_out)     # [seq_length, seq_length]
         predicted_tree, _ = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)
 
         if calculate_loss:
@@ -110,26 +110,4 @@ class KiperwasserDependencyParser(nn.Module):
             for j in range(n):
                 v = torch.cat((word_vectors[i], word_vectors[j])).unsqueeze(0)
                 score_matrix[i][j] = self.MLP(v)
-        return score_matrix
-
-
-# This nn has been replaced by a sequential in the main nn
-class MLPScorer(nn.Module):
-    def __init__(self, input_dim, hidden_dim, activation_function):
-        super(MLPScorer, self).__init__()
-        self.W1 = nn.Linear(in_features=input_dim, out_features=hidden_dim)
-        self.activation = activation_function
-        self.W2 = nn.Linear(in_features=hidden_dim, out_features=1)  # output is MLP score
-
-    def forward(self, input):
-        input = torch.squeeze(input)
-        n = input.shape[0]
-        score_matrix = torch.empty(n, n)
-        for i in range(n):
-            for j in range(n):
-                v = torch.cat((input[i], input[j])).unsqueeze(0)
-                x = self.W1(v)
-                x = self.activation(x)
-                x = self.W2(x)
-                score_matrix[i][j] = x
         return score_matrix

@@ -3,16 +3,13 @@ from torchtext.vocab import Vocab
 from torch.utils.data.dataset import Dataset
 from collections import Counter, defaultdict
 
-# These are not relevant for our POS tagger but might be useful for HW2
 UNKNOWN_TOKEN = "<unk>"
 PAD_TOKEN = "<pad>"  # Optional: this is used to pad a batch of sentences in different lengths.
-# ROOT_TOKEN = PAD_TOKEN  # this can be used if you are not padding your batches
 ROOT_TOKEN = "<root>"  # use this if you are padding your batches and want a special token for ROOT
 SPECIAL_TOKENS = [PAD_TOKEN, UNKNOWN_TOKEN]  # did not add ROOT_TOKEN to here because it's already in the sentence
 
 ROOT_TOKEN_COUNTER = 0
 ROOT_TOKEN_HEAD = -1
-# TODO https://moodle.technion.ac.il/mod/forum/discuss.php?d=522050
 
 
 class ParserDataReader:
@@ -53,20 +50,19 @@ class ParserDataReader:
 
 
 class ParserDataset(Dataset):
-    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1, padding=False,
+    def __init__(self, word_dict, pos_dict, dir_path: str, subset: str, min_freq=1,
                  word_embeddings=None, alpha=0.25, train_word_freq=None, lowercase=False):
         super().__init__()
         self.alpha = alpha
         self.train_word_freq = train_word_freq
         self.min_freq = min_freq
         self.lowercase = lowercase
-
-        self.subset = subset  # One of the following: [train, test, comp]
+        self.subset = subset
         self.file = dir_path + subset
         self.datareader = ParserDataReader(self.file, word_dict, pos_dict, self.lowercase)
         self.vocab_size = len(self.datareader.word_dict)
         if word_embeddings:
-            self.word_idx_mappings, self.idx_word_mappings, self.word_vectors =\
+            self.word_idx_mappings, self.idx_word_mappings, self.word_vectors = \
                 self.import_pre_trained_vocab(word_embeddings, self.datareader.word_dict)
             self.word_vector_dim = self.word_vectors.size(-1)
         else:
@@ -79,7 +75,7 @@ class ParserDataset(Dataset):
         self.unknown_idx = self.word_idx_mappings.get(UNKNOWN_TOKEN)
         self.sentence_lens = [len(sentence) for sentence in self.datareader.sentences]
         self.max_seq_len = max(self.sentence_lens)
-        self.sentences_dataset = self.convert_sentences_to_dataset(padding)
+        self.sentences_dataset = self.convert_sentences_to_dataset()
 
     def __len__(self):
         return len(self.sentences_dataset)
@@ -104,7 +100,6 @@ class ParserDataset(Dataset):
         pos_idx_mappings = {self.idx_word_mappings[idx]: idx for idx in idx_pos_mappings}
 
         for i, pos in enumerate(sorted(pos_dict.keys())):
-            # pos_idx_mappings[str(pos)] = int(i)
             pos_idx_mappings[str(pos)] = int(i + len(SPECIAL_TOKENS))
             idx_pos_mappings.append(str(pos))
         return pos_idx_mappings, idx_pos_mappings
@@ -112,7 +107,7 @@ class ParserDataset(Dataset):
     def get_pos_vocab(self):
         return self.pos_idx_mappings, self.idx_pos_mappings
 
-    def convert_sentences_to_dataset(self, padding):  # TODO padding
+    def convert_sentences_to_dataset(self):
         sentence_word_idx_list = list()
         sentence_pos_idx_list = list()
         sentence_len_list = list()
@@ -139,20 +134,10 @@ class ParserDataset(Dataset):
 
                 true_tree_heads.append((head_idx, modifier_idx))
             sentence_len = len(words_idx_list)
-            # if padding:
-            #     while len(words_idx_list) < self.max_seq_len:
-            #         words_idx_list.append(self.word_idx_mappings.get(PAD_TOKEN))
-            #         pos_idx_list.append(self.pos_idx_mappings.get(PAD_TOKEN))
             sentence_word_idx_list.append(torch.tensor(words_idx_list, dtype=torch.long, requires_grad=False))
             sentence_pos_idx_list.append(torch.tensor(pos_idx_list, dtype=torch.long, requires_grad=False))
             sentence_len_list.append(sentence_len)
             sentence_true_heads_list.append(true_tree_heads)
-
-        # if padding:
-        #     all_sentence_word_idx = torch.tensor(sentence_word_idx_list, dtype=torch.long)
-        #     all_sentence_pos_idx = torch.tensor(sentence_pos_idx_list, dtype=torch.long)
-        #     all_sentence_len = torch.tensor(sentence_len_list, dtype=torch.long, requires_grad=False)
-        #     return TensorDataset(all_sentence_word_idx, all_sentence_pos_idx, all_sentence_len)
 
         return {i: sample_tuple for i, sample_tuple in enumerate(zip(sentence_word_idx_list,
                                                                      sentence_pos_idx_list,
@@ -160,7 +145,7 @@ class ParserDataset(Dataset):
                                                                      sentence_true_heads_list))}
 
     def dropout(self, word):
-        drop_prob = self.alpha / (self.alpha+self.train_word_freq[word])
+        drop_prob = self.alpha / (self.alpha + self.train_word_freq[word])
         return torch.bernoulli(torch.tensor(drop_prob))
 
 
