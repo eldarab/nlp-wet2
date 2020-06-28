@@ -22,11 +22,11 @@ def UAS(true_tree_arcs, pred_tree_arcs):
     return correct / num_deps
 
 
-def evaluate(model, dataloader):
+def evaluate(model: KiperwasserDependencyParser, dataloader: DataLoader):
     """
     Gets a trained model and a dataset to check the model's accuracy on
     :param dataloader: A DataLoader object with the data to evaluate the model on
-    :param model: Preferably trained Kipperwasser model object
+    :param model: Preferably trained Kiperwasser model object
     :return: Accuracy of the model on the given dataset
     """
     accuracy_sum = 0
@@ -40,11 +40,14 @@ def evaluate(model, dataloader):
     return accuracy_sum / len(dataloader)
 
 
-def predict_data(model: KiperwasserDependencyParser, dataset: DataLoader, limit=float('inf')):  # TODO remove limit
+def predict_data(model: KiperwasserDependencyParser, dataloader: DataLoader):
+    """
+    :param model: KWDP model.
+    :param dataloader: A dataloader for data that can be either labeled or unlabeled.
+    :return: The predictions of the model for the dataset.
+    """
     with torch.no_grad():
         predictions = []
-        for num, sentence in enumerate(dataset):
-            if num == limit:
-                break
+        for num, sentence in enumerate(dataloader):
             predictions.append(list(model(sentence, False)[1]))
     return predictions

@@ -6,9 +6,23 @@ from warnings import warn
 
 
 class KiperwasserDependencyParser(nn.Module):
-    def __init__(self, lstm_hidden_layers, pos_vocab_size, pos_embedding_size, encoder_hidden_size, mlp_hidden_dim,
-                 word_vocab_size=None, word_embedding_size=None, word_embeddings=None,
-                 loss_function=NLLLoss, activation_function=nn.Tanh()):
+    def __init__(self, encoder_layers, encoder_hidden_size, pos_vocab_size, pos_embedding_size, mlp_hidden_dim,
+                 word_vocab_size=None, word_embedding_size=None, word_embeddings=None, activation_function=nn.Tanh(),
+                 loss_function=NLLLoss):
+        """
+        Initializer for the model, initializes the embedding layer for the words, the biLSTM for the contextual
+        embedding of the words, and the MLP scorer for the edges of the graph.
+        :param encoder_layers: The amount of layers of the bi-lstm encoder.
+        :param encoder_hidden_size: The dimension of the hidden layers of the bi-lstm encoder.
+        :param pos_vocab_size: The number of unique pos tags in our vocabulary.
+        :param pos_embedding_size: The dimension of the embedding of the pos tags.
+        :param mlp_hidden_dim: The dimension of the hidden layer of the mlp scorer.
+        :param word_vocab_size: The number of unique words in our vocabulary.
+        :param word_embedding_size: The dimension of the embedding of the words.
+        :param word_embeddings: A tensor matrix of pre-trained word vectors.
+        :param activation_function: An activation function for the MLP edge-scorer.
+        :param loss_function: The loss function to be used on the loss function.
+        """
         super(KiperwasserDependencyParser, self).__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.activation = activation_function
@@ -17,6 +31,7 @@ class KiperwasserDependencyParser(nn.Module):
         if (word_vocab_size is None or word_embedding_size is None) and word_embeddings is None:
             raise Exception('No word embeddings have been given to the model')
 
+        # Embedding layer
         if word_embeddings:
             self.pre_trained_word_embedding = nn.Embedding.from_pretrained(word_embeddings, freeze=False)
         else:
@@ -28,10 +43,12 @@ class KiperwasserDependencyParser(nn.Module):
         self.pos_embedding = nn.Embedding(pos_vocab_size, pos_embedding_size)
 
         self.hidden_dim = self.get_embedding_dim()
-        self.encoder = nn.LSTM(input_size=self.hidden_dim, hidden_size=encoder_hidden_size,
-                               num_layers=lstm_hidden_layers, bidirectional=True)
 
-        # self.edge_scorer = MLPScorer(4 * encoder_hidden_size, mlp_hidden_dim, activation_function)
+        # BiLSTM layer
+        self.encoder = nn.LSTM(input_size=self.hidden_dim, hidden_size=encoder_hidden_size,
+                               num_layers=encoder_layers, bidirectional=True)
+
+        # MLP scorer
         self.MLP = nn.Sequential(
             nn.Linear(in_features=4 * encoder_hidden_size, out_features=mlp_hidden_dim),
             self.activation,
@@ -41,15 +58,22 @@ class KiperwasserDependencyParser(nn.Module):
         self.loss_function = loss_function
 
     def forward(self, sentence, calculate_loss=True):
+        """
+        :param sentence: A sentence represented with a tensor of indices for the words, a tensor of indices for
+        pos tags, the length of the sentence, and the head of each word in the parse tree.
+        :param calculate_loss: A boolean stating whether the loss should be calculated.
+        :return: The loss, and the predicted tree.
+        """
         word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence  # TODO padding
 
         word_idx_tensor = torch.squeeze(word_idx_tensor.to(self.device))
         pos_idx_tensor = torch.squeeze(pos_idx_tensor.to(self.device))
 
-        words_embedded = self.embed_words(word_idx_tensor)                                          # [seq_length, word_embedding_size]
-        poss_embedded = self.pos_embedding(pos_idx_tensor)                                          # [seq_length, pos_embedding_size]
-        embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)     # [seq_length, batch_size, hidden_dim]
-        lstm_out, _ = self.encoder(embeds)                                                          # [seq_length, batch_size, 2*hidden_dim]
+        words_embedded = self.embed_words(word_idx_tensor)  # [seq_length, word_embedding_size]
+        poss_embedded = self.pos_embedding(pos_idx_tensor)  # [seq_length, pos_embedding_size]
+        embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1,
+                                                                        self.hidden_dim)  # [seq_length, batch_size, hidden_dim]
+        lstm_out, _ = self.encoder(embeds)  # [seq_length, batch_size, 2*hidden_dim]
         # score_matrix = self.edge_scorer(lstm_out)                                                 # [seq_length, seq_length]
         score_matrix = self.generate_score_matrix(lstm_out)
         predicted_tree, _ = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)
