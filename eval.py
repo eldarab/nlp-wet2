@@ -22,6 +22,24 @@ def UAS(true_tree_arcs, pred_tree_arcs):
     return correct / num_deps
 
 
+# def evaluate(model, dataloader):
+#     """
+#     Gets a trained model and a dataset to check the model's accuracy on
+#     :param dataloader: A DataLoader object with the data to evaluate the model on
+#     :param model: Preferably trained Kipperwasser model object
+#     :return: Accuracy of the model on the given dataset
+#     """
+#     accuracy_sum = 0
+#     with torch.no_grad():
+#         for batch_idx, input_data in enumerate(dataloader):
+#             _, _, _, true_tree = input_data
+#             _, pred_tree = model(input_data)
+#             true_tree = convert_tree_to_list(true_tree)
+#             pred_tree = list(pred_tree)
+#             accuracy_sum += UAS(true_tree, pred_tree)
+#     return accuracy_sum / len(dataloader)
+
+
 def evaluate(model, dataloader):
     """
     Gets a trained model and a dataset to check the model's accuracy on
@@ -29,15 +47,21 @@ def evaluate(model, dataloader):
     :param model: Preferably trained Kipperwasser model object
     :return: Accuracy of the model on the given dataset
     """
-    accuracy_sum = 0
+    correct_sum = 0
+    arc_count = 0
     with torch.no_grad():
         for batch_idx, input_data in enumerate(dataloader):
             _, _, _, true_tree = input_data
             _, pred_tree = model(input_data)
             true_tree = convert_tree_to_list(true_tree)
             pred_tree = list(pred_tree)
-            accuracy_sum += UAS(true_tree, pred_tree)
-    return accuracy_sum / len(dataloader)
+            for true_arc, pred_arc in zip(true_tree, pred_tree):
+                if true_arc == -1:
+                    continue
+                if true_arc == pred_arc:
+                    correct_sum += 1
+                arc_count += 1
+    return correct_sum / arc_count
 
 
 def predict_data(model: KiperwasserDependencyParser, dataset: DataLoader, limit=float('inf')):  # TODO remove limit

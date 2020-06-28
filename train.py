@@ -1,6 +1,6 @@
 import pickle
 import os
-from torch import optim
+from torch import optim, nn
 from torch.utils.data.dataloader import DataLoader
 from auxiliary import convert_tree_to_list
 from data import ParserDataset
@@ -43,7 +43,7 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
             _, _, _, true_tree = input_data
             true_tree = convert_tree_to_list(true_tree)
             predicted_tree = list(predicted_tree)
-            train_acc += UAS(predicted_tree, true_tree)
+            train_acc += UAS(predicted_tree, true_tree)  # https://moodle.technion.ac.il/mod/forum/discuss.php?d=524588#p799906
 
         epoch_loss = epoch_loss / len(train_dataset)
         train_acc = train_acc / len(train_dataset)
@@ -66,8 +66,9 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
 
 def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_embedding_size=25, mlp_hidden_dim=100,
                 lstm_hidden_layers=2, encoder_hidden_size=125, alpha=0.25, word_embeddings=None, lowercase=False,
-                epochs=10, lr=0.1, batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
+                activation=nn.Tanh(), epochs=10, lr=0.1, batch_size=50, CUDA=True, print_epochs=True, save_dir=None):
     """
+    :param activation: Activation function
     :param lowercase:
     :param word_embeddings:
     :param model_name:
@@ -111,7 +112,8 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
                                         pos_embedding_size=pos_embedding_size,
                                         encoder_hidden_size=encoder_hidden_size,
                                         mlp_hidden_dim=mlp_hidden_dim,
-                                        word_embeddings=word_embeddings)
+                                        word_embeddings=word_embeddings,
+                                        activation_function=activation)
 
     # training model
     if CUDA:
