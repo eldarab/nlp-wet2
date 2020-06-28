@@ -55,9 +55,7 @@ def train(epochs, batch_size, optimizer, train_dataset, train_dataloader, test_d
         if print_epochs:
             print("Epoch: {}\tLoss: {}\tTrain Accuracy: {}\tTest Accuracy: {}".
                   format(epoch + 1, round(epoch_loss, 4), round(train_acc, 4), round(test_acc, 4)))
-                         # np.mean(loss_list[-e_interval:]),
-                         # np.mean(train_acc_list[-e_interval:]),
-                         # test_acc))
+
         if save_path:
             torch.save(model, save_path + '/epoch' + str(epoch) + '.eh')
 
@@ -104,14 +102,10 @@ def train_model(model_name, data_dir, filenames, word_embedding_size=100, pos_em
     word_vocab_size = len(train_dataset.word_idx_mappings)  # includes words from test
     pos_vocab_size = len(train_dataset.pos_idx_mappings)  # includes POSs from test
     word_embeddings = train_dataset.word_vectors
-    model = KiperwasserDependencyParser(lstm_hidden_layers=lstm_hidden_layers,
-                                        word_vocab_size=word_vocab_size,
-                                        word_embedding_size=word_embedding_size,
-                                        pos_vocab_size=pos_vocab_size,
-                                        pos_embedding_size=pos_embedding_size,
-                                        encoder_hidden_size=encoder_hidden_size,
-                                        mlp_hidden_dim=mlp_hidden_dim,
-                                        word_embeddings=word_embeddings)
+    model = KiperwasserDependencyParser(encoder_layers=lstm_hidden_layers, encoder_hidden_size=encoder_hidden_size,
+                                        pos_vocab_size=pos_vocab_size, pos_embedding_size=pos_embedding_size,
+                                        mlp_hidden_dim=mlp_hidden_dim, word_vocab_size=word_vocab_size,
+                                        word_embedding_size=word_embedding_size, word_embeddings=word_embeddings)
 
     # training model
     if CUDA:

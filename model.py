@@ -64,18 +64,17 @@ class KiperwasserDependencyParser(nn.Module):
         :param calculate_loss: A boolean stating whether the loss should be calculated.
         :return: The loss, and the predicted tree.
         """
-        word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence  # TODO padding
+        word_idx_tensor, pos_idx_tensor, _, true_tree_heads = sentence
 
         word_idx_tensor = torch.squeeze(word_idx_tensor.to(self.device))
         pos_idx_tensor = torch.squeeze(pos_idx_tensor.to(self.device))
 
-        words_embedded = self.embed_words(word_idx_tensor)  # [seq_length, word_embedding_size]
-        poss_embedded = self.pos_embedding(pos_idx_tensor)  # [seq_length, pos_embedding_size]
-        embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1,
-                                                                        self.hidden_dim)  # [seq_length, batch_size, hidden_dim]
-        lstm_out, _ = self.encoder(embeds)  # [seq_length, batch_size, 2*hidden_dim]
-        # score_matrix = self.edge_scorer(lstm_out)                                                 # [seq_length, seq_length]
-        score_matrix = self.generate_score_matrix(lstm_out)
+        words_embedded = self.embed_words(word_idx_tensor)                      # [seq_length, word_embedding_size]
+        poss_embedded = self.pos_embedding(pos_idx_tensor)                      # [seq_length, pos_embedding_size]
+        embeds = torch.cat((words_embedded, poss_embedded), dim=1).view(-1, 1, self.hidden_dim)
+                                                                                # [seq_length, batch_size, hidden_dim]
+        lstm_out, _ = self.encoder(embeds)                                      # [seq_length, batch_size, 2*hidden_dim]
+        score_matrix = self.generate_score_matrix(lstm_out)                     # [seq_length, seq_length]
         predicted_tree, _ = self.decoder(score_matrix.detach().numpy(), score_matrix.shape[0], has_labels=False)
 
         if calculate_loss:
