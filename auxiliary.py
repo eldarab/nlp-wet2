@@ -1,17 +1,6 @@
 from torch import nn
 
 
-def add_or_append(dictionary, item, size=1):
-    """
-    Add size to the key item if it is in the dictionary, otherwise appends the key to the dictionary
-    """
-    if item not in dictionary:
-        dictionary[item] = size
-    else:
-        dictionary[item] += size
-
-
-# TODO deprecated? Delete it if it is so
 def split(string, delimiters):
     """
         Split strings according to delimiters
@@ -30,24 +19,6 @@ def split(string, delimiters):
                 stack.insert(i + j, _substring)
 
     return stack
-
-
-def write_report_header(report_path):
-    with open(report_path, 'w') as report:
-        report.write('model_name,word_embedding_size,pos_embedding_size,mlp_hidden_dim,lstm_hidden_layers,\
-                      encoder_hidden_size,alpha,word_embeddings,RNN_type,optimizer,epochs,lr,batch_size')
-        report.write('\n')
-
-
-def write_report_line(report_path, hp_dict):
-    """
-
-    :param report_path:
-    :param hp_dict: Hyper parameter dict
-    :return:
-    """
-    with open(report_path, 'a') as report:
-        report.write()
 
 
 def convert_tree_to_list(tree):
@@ -96,30 +67,3 @@ def NLLLoss(score_matrix, true_tree_arcs):
             continue
         log_softmax_sum += prob_score_matrix[h, m]
     return (-1 / size_Y) * log_softmax_sum
-
-
-# def generate_dicts(file_list):
-#     """
-#     Extracts words and tags vocabularies.
-#     :return: word2idx, tag2idx, idx2word, idx2tag
-#     """
-#     word2idx_dict = {ROOT_TOKEN: 0}
-#     pos2idx_dict = {ROOT_TOKEN: 0}
-#     for file in file_list:
-#         with open(file, 'r') as f:
-#             word_counter, pos_counter = 1, 1  # already used 0 for ROOT_TOKEN
-#             for line in f:  # each line in the test data corresponds to at most one word
-#                 if line == '\n':
-#                     continue
-#                 line_splitted = line.split('\t')
-#                 assert len(line_splitted) >= 6
-#                 word = line_splitted[1]
-#                 pos = line_splitted[3]
-#                 if word not in word2idx_dict:
-#                     word2idx_dict[word] = word_counter
-#                     word_counter += 1
-#                 if pos not in pos2idx_dict:
-#                     pos2idx_dict[pos] = pos_counter
-#                     pos_counter += 1
-#
-#     return word2idx_dict, pos2idx_dict
