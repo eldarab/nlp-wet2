@@ -66,7 +66,7 @@ def evaluate(model: KiperwasserDependencyParser, dataloader: DataLoader):
 
 def predict_data(model: KiperwasserDependencyParser, dataloader: DataLoader):
     """
-    :param model: KWDP model.
+    :param model: KWP model.
     :param dataloader: A dataloader for data that can be either labeled or unlabeled.
     :return: The predictions of the model for the dataset.
     """

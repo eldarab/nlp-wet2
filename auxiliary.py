@@ -35,16 +35,13 @@ def convert_tree_to_list(tree):
 
 
 def save_predictions(predictions: list, source_file_path: str, predictions_dir: str, predictions_file_name: str):
-    """"""
     predictions_flat = [item for sublist in predictions for item in sublist]  # flatten list
     predictions_filtered = filter(lambda x: x != -1, predictions_flat)  # remove -1 as we do not want to print them
     with open(source_file_path, 'r') as source_file:
         with open(predictions_dir + predictions_file_name, 'w') as prediction_file:
-            print_list = []
             pred_iter = iter(predictions_filtered)
             for line in source_file:
                 if line == '\n':
-                    # print_list.append(str())
                     prediction_file.write('\n')
                     continue
                 try:
