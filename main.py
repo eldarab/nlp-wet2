@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torch.utils.data.dataloader import DataLoader
-from eval import evaluate
+from eval import evaluate, evaluate_old
 from data import init_vocab_freq, ParserDataset
 from train import train_model, draw_graphs
 
@@ -15,12 +15,13 @@ comp_filename = 'comp.unlabeled'
 
 paths_list = [data_dir + train_filename, data_dir + test_filename]
 word_dict, pos_dict = init_vocab_freq(paths_list, lowercase=True)
-test_dataset = ParserDataset(word_dict, pos_dict, data_dir, test_filename, padding=False, lowercase=True)
+test_dataset = ParserDataset(word_dict, pos_dict, data_dir, test_filename, lowercase=True)
 test_dataloader = DataLoader(test_dataset, shuffle=False)
-with open('dumps/model-comp11/epoch5.eh', 'rb') as f:
+with open('dumps/model-glove12/epoch6.eh', 'rb') as f:
     loaded_model = torch.load(f)
 loaded_model.to('cuda')
 
+print('accuracy old: ', evaluate_old(loaded_model, test_dataloader))
 print('accuracy new: ', evaluate(loaded_model, test_dataloader))
 
 # model_name = 'base-model'
