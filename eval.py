@@ -22,24 +22,6 @@ def UAS(true_tree_arcs, pred_tree_arcs):
     return correct / num_deps
 
 
-# def evaluate(model, dataloader):
-#     """
-#     Gets a trained model and a dataset to check the model's accuracy on
-#     :param dataloader: A DataLoader object with the data to evaluate the model on
-#     :param model: Preferably trained Kipperwasser model object
-#     :return: Accuracy of the model on the given dataset
-#     """
-#     accuracy_sum = 0
-#     with torch.no_grad():
-#         for batch_idx, input_data in enumerate(dataloader):
-#             _, _, _, true_tree = input_data
-#             _, pred_tree = model(input_data)
-#             true_tree = convert_tree_to_list(true_tree)
-#             pred_tree = list(pred_tree)
-#             accuracy_sum += UAS(true_tree, pred_tree)
-#     return accuracy_sum / len(dataloader)
-
-
 def evaluate(model: KiperwasserDependencyParser, dataloader: DataLoader):
     """
     Gets a trained model and a dataset to check the model's accuracy on
